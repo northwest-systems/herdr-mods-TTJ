@@ -1,0 +1,5 @@
+node_modules/
+*.log
+*.error
+mods/ttj/gpui-kit.d.ts
+mods/ttj/jsconfig.json
