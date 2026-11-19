@@ -1,0 +1,73 @@
+{
+  "id": "ttj-side",
+  "type": "row",
+  "divider": {
+    "width": 1,
+    "color": "border"
+  },
+  "children": [
+    {
+      "id": "herdr-workspace",
+      "type": "row",
+      "children": [
+        {
+          "id": "workspace-sidebar",
+          "type": "column",
+          "size": {
+            "px": 180
+          },
+          "children": [
+            {
+              "id": "workspace-spaces",
+              "type": "block",
+              "content": {
+                "mod": "spaces"
+              }
+            },
+            {
+              "id": "workspace-agents",
+              "type": "block",
+              "content": {
+                "mod": "agents"
+              }
+            }
+          ]
+        },
+        {
+          "id": "herdr-work",
+          "type": "column",
+          "children": [
+            {
+              "id": "workspace-tabs",
+              "type": "block",
+              "size": {
+                "px": 36
+              },
+              "content": {
+                "mod": "tabs"
+              }
+            },
+            {
+              "id": "workspace-panes",
+              "type": "block",
+              "content": {
+                "tab": "active"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ttj-panel",
+      "type": "block",
+      "min": 280,
+      "content": {
+        "mod": "ttj"
+      },
+      "size": {
+        "px": 420
+      }
+    }
+  ]
+}

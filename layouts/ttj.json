@@ -1,0 +1,14 @@
+{
+  "id": "ttj-root",
+  "type": "column",
+  "children": [
+    {
+      "id": "ttj-panel",
+      "type": "block",
+      "min": 240,
+      "content": {
+        "mod": "ttj"
+      }
+    }
+  ]
+}

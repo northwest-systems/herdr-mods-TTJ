@@ -1,0 +1,13 @@
+Octicons
+Source: https://github.com/primer/octicons
+MIT-licensed icon examples: checklist-16.svg, tag-16.svg, star-16.svg
+Full copyright and permission notice: mods/ttj/assets/octicons/LICENSE
+
+GitHub mark
+File: mods/ttj/assets/octicons/mark-github-16.svg
+Source: https://github.com/primer/octicons/blob/main/icons/mark-github-16.svg
+Brand usage guidelines: https://brand.github.com/foundations/logo
+GitHub and the Invertocat logo are trademarks of GitHub, Inc.
+The original mark is included unchanged and identifies GitHub-related work.
+The separate status ring is a UI indicator. It is not part of the GitHub mark.
+GitHub logo usage follows the brand guidelines; the general MIT notice is not a trademark license.
