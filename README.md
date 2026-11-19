@@ -1,5 +1,10 @@
 # Herdr TTJ Mod
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="mods/ttj/assets/app-icon.png">
+  <img src="mods/ttj/assets/app-icon-light.png" alt="TTJ" width="96" height="96">
+</picture>
+
 ## 概要
 
 TTJCore 0.1.0を使い、Projectごとのタイムライン・TaskからTicketへ分岐するキャンバス・Task／Ticketリストを切り替えるHerdr Modです。バージョンは0.1.0です。Windows・Linux・macOSのHerdr 0.1.15以降を対象にします。

@@ -488,7 +488,7 @@ export default class TTJ extends View {
     const state=this.state();
     return v_flex().size_full().min_w(0).min_h(0).bg(t.background).text_color(t.foreground)
       .child(h_flex().w_full().h(34).flex_none().px(10).gap(4).items_center().bg(t.surface)
-        .child(div().text_size(14).font_semibold().text_color(t.accent).child("TTJ"))
+        .child(image(t.dark ? "mods/ttj/assets/app-icon.png" : "mods/ttj/assets/app-icon-light.png").size(28).flex_none().accessibility_label("TTJ"))
         .child(div().flex_1())
         .child(this.button("project-new","plus","Projectを作成",()=>this.overlay("create","project"),t))
         .child(this.button("project-details","folder","Projectの詳細",cx=>this.openRecord("project",this.project,cx),t,false,!this.project))
