@@ -38,77 +38,35 @@ herdr-app do layout.switch --name ttj
 3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。
 4. 標準接続はCoreの初期化・起動・接続を自動で行います。標準接続ではinit・serveを手動実行したり、profileを指定したりする必要はありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
 
+## 使い方ガイド
+
+[画像付き使い方ガイド](docs/usage-guide.md)で、横配置・下配置・別タブ・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
+
+[Ticket app iconの10案](docs/icon-concepts.md)は、緑と黄緑の2色・1:1のPNGとSVGです。
+
 ## フォルダ構造
 
+配布対象を`tree /A`で表示した構成です。ファイルまで含む一覧は[folder-structure.txt](docs/folder-structure.txt)を参照してください。`.git`とローカルの生成物は含みません。
+
 ```text
-mods/ttj/
-  main.js     Herdrの画面・入力・詳細モーダル
-  model.js    キャンバス配置・Jobの表示範囲・履歴表示
-  client.js   Coreの自動起動とJSON-RPC呼び出し
-  icons/      操作用アイコン
-  assets/octicons/  Job・GitHub・nametagの例とライセンス
-  mod.json    Herdr Modの設定
-layouts/
-  ttj.json        TTJ専用ウインドウ向け
-  ttj-side.json   Herdrの横にTTJ
-  ttj-bottom.json Herdrの下にTTJ
-scripts/      PowerShell・shのインストール処理
-skills/herdr-ttj/ LLM向け利用スキル
-tests/        接続・履歴・配置・Job表示のテスト
+herdr-mods-TTJ/
++---.github
+|   \---workflows
++---docs
+|   \---assets
+|       +---app-icons
+|       \---guide
++---layouts
++---mods
+|   \---ttj
+|       +---assets
+|       |   \---octicons
+|       \---icons
++---scripts
++---skills
+|   \---herdr-ttj
+\---tests
 ```
-
-## 画面の使い方
-
-| 操作 | 表示・動作 |
-|---|---|
-| Projectタブ | CoreのProject名を表示。表示形式・リスト種別・キャンバス位置をProjectごとに保持 |
-| タイムライン | 実行・状態変更の履歴。行をクリックするとactor・reason・変更内容 |
-| キャンバス | Taskが先頭ノードとなり、Ticketの依存関係を矢印で表示 |
-| リスト | Task／Ticketを切り替え。行をクリックして詳細 |
-| カード／行 | objective・summary・statusを簡潔に表示。詳細は固定サイズのモーダルでスクロール |
-| Jobアイコン | status色の太いリング。クリックでinstructions・criteria・result・Run |
-| nametag | ホバーでID、クリックでコピー |
-| 本のアイコン | 選択Projectのknowledge。TicketのhandoffsはTicket詳細 |
-| 設定 | 操作者、接続、テーマ、アイコンキーとファイルの対応 |
-
-Task・Ticketカードは内容にかかわらず同じ幅・高さです。キャンバスは背景のドラッグ・ホイールで移動し、＋／−、Ctrlまたはプラットフォーム修飾キー付きホイール、ピンチで拡大縮小します。リセットで初期表示に戻ります。
-
-Jobは左詰めで最大8個です。8個を超える場合、doingのJobと最大6個の前工程、次の1個を表示します。最後のJobがdoingなら7個です。doingがなければ最初のcompleted・canceled以外のJob、全てcompleted・canceledなら最後を基準にします。Job詳細一覧には全件を上から実行順に表示します。
-
-Taskのobjective・criteria・deadline、Ticketのassignee・depends・handoffs・resume・priorityを編集できます。TicketのobjectiveとJobの定義・順序は固定です。summary・JobのiconはTTJのrecord本体とは別のdisplayです。並行する変更と競合した場合は最新内容を読み直します。削除するには対象と配下をcompletedまたはcanceledにしてください。削除後もCoreに履歴と依存参照が残ります。
-
-## 接続・テーマ・アイコン
-
-標準接続は、同梱した`mods/ttj/bin/ttjcore`（Windowsは.exe）、次にPATHの`ttjcore`を使います。カスタム接続では実行ファイル・固定引数のJSON配列・プロファイル・自動起動の有無を指定します。引数はシェルを介さず渡します。任意のPostgreSQLはCore側で設定し、ModはそのCoreのプロファイルへ接続します。
-
-テーマはHerdrに従う／ライト／ダークを選べます。ライトのアクセントは濃い緑、ダークは明るい黄緑です。テーマ・接続・操作者・アイコン対応はHerdrアプリ内の共通設定です。
-
-Jobごとに`job`、`github`、`custom.star`などのキーを指定します。設定のJSONで任意キーをSVG／PNGのパスへ対応付けられます。相対パスはHerdrの設定フォルダーから参照します。
-
-```json
-{"custom.build":"mods/ttj/assets/build.svg"}
-```
-
-同梱例はOcticonsのchecklist・GitHubマーク・star・tagです。GitHubマークはGitHub関連のJobを示し、PR専用アイコンではありません。キー`id.copy`はコピーアイコンに使用します。ライセンスとGitHubブランド上の扱いは[THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt)を参照してください。追加するアイコンの利用条件は各提供元に従ってください。
-
-## Herdrと並べて開く
-
-`herdr-app do layout.switch --name ttj-side`で横、`--name ttj-bottom`で下、`--name ttj`で専用画面に切り替えます。レイアウトの`ttj-panel`をリサイズできます。
-
-別のOSウインドウで使う場合は、そのウインドウ用の`HERDR_APP_HOME`へModを配置してHerdrを起動します。同じOSユーザー・Coreプロファイルなら、作業側のHerdrと同じCoreへ接続できます。
-
-```powershell
-$env:HERDR_APP_HOME = Join-Path $HOME '.config/herdr-ttj'
-pwsh -File scripts/install.ps1
-herdr-app
-```
-
-```sh
-HERDR_APP_HOME="$HOME/.config/herdr-ttj" sh scripts/install.sh
-HERDR_APP_HOME="$HOME/.config/herdr-ttj" herdr-app
-```
-
-別ウインドウでも初回はttjレイアウトを選んでください。異なるHerdrアプリ設定フォルダー間では表示設定を共有しません。HERDR_APP_HOMEの変更はHerdrのSpace・terminalの隔離を意味しません。
 
 ## 開発
 

@@ -16,6 +16,8 @@ TTJCore 0.1.0とHerdr 0.1.15以降を使用する。Modリポジトリで、Powe
 - Projectのknowledgeは本のアイコンから開く。TicketのhandoffsはTicket詳細、resumeも同じ詳細で確認する。
 - 設定では標準／custom接続、操作者、theme、iconとファイルの対応を扱う。Jobごとにjob・github・custom.starなどのkeyを指定する。任意keyはSVG／PNGのpathへ対応付け、提供元の利用条件に従う。
 
+別タブはタブを表示するlayoutで`herdr-app do tab.new --name TTJ --mod ttj`、同じタブの右側paneは`herdr-app do pane.split --direction right --mod ttj`を使う。
+
 横配置は`herdr-app do layout.switch --name ttj-side`、下配置は`--name ttj-bottom`、専用画面は`--name ttj`を使う。別のOSウインドウは別HERDR_APP_HOMEへModを配置して起動し、同じTTJCore profileへ接続する。HERDR_APP_HOMEの変更はHerdrのSpace・terminalの隔離を意味しない。
 
 LLMがCoreのrecord・eventを扱うときは、[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/bf3efeffb76265910407c33b5489bcfb767a2d67/skills/ttjcore/references/protocol.md)を読む。TTJCore CLI／RPCへ直接接続し、UIから状態を取得しない。実行側がCoreに記録した変更がModへ反映される。

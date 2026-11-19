@@ -1,0 +1,105 @@
+herdr-mods-TTJ/
+|   .gitignore
+|   LICENSE
+|   package.json
+|   README.md
+|   THIRD_PARTY_NOTICES.txt
+|
++---.github
+|   \---workflows
+|           ci.yml
+|
++---docs
+|   |   folder-structure.txt
+|   |   icon-concepts.md
+|   |   usage-guide.md
+|   |
+|   \---assets
+|       +---app-icons
+|       |       01-stub.png
+|       |       01-stub.svg
+|       |       02-upright.png
+|       |       02-upright.svg
+|       |       03-stack.png
+|       |       03-stack.svg
+|       |       04-diagonal.png
+|       |       04-diagonal.svg
+|       |       05-check.png
+|       |       05-check.svg
+|       |       06-flow.png
+|       |       06-flow.svg
+|       |       07-outline.png
+|       |       07-outline.svg
+|       |       08-inverse.png
+|       |       08-inverse.svg
+|       |       09-square.png
+|       |       09-square.svg
+|       |       10-fold.png
+|       |       10-fold.svg
+|       |       overview.png
+|       |       overview.svg
+|       |
+|       \---guide
+|               open-bottom.png
+|               open-bottom.svg
+|               open-pane.png
+|               open-pane.svg
+|               open-side.png
+|               open-side.svg
+|               open-tab.png
+|               open-tab.svg
+|               open-window.png
+|               open-window.svg
+|
++---layouts
+|       ttj-bottom.json
+|       ttj-side.json
+|       ttj.json
+|
++---mods
+|   \---ttj
+|       |   client.js
+|       |   main.js
+|       |   mod.json
+|       |   model.js
+|       |
+|       +---assets
+|       |   \---octicons
+|       |           checklist-16.svg
+|       |           LICENSE
+|       |           mark-github-16.svg
+|       |           SOURCES.json
+|       |           star-16.svg
+|       |           tag-16.svg
+|       |
+|       \---icons
+|               arrowhead.svg
+|               back.svg
+|               book.svg
+|               close.svg
+|               edit.svg
+|               folder.svg
+|               list.svg
+|               minus.svg
+|               plus.svg
+|               refresh.svg
+|               reset.svg
+|               save.svg
+|               settings.svg
+|               status.svg
+|               task.svg
+|               ticket.svg
+|               timeline.svg
+|               trash.svg
+|               tree.svg
+|
++---scripts
+|       install.ps1
+|       install.sh
+|
++---skills
+|   \---herdr-ttj
+|           SKILL.md
+|
+\---tests
+        viewer.test.js
