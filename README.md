@@ -42,7 +42,7 @@ herdr-app do layout.switch --name ttj
 
 [画像付き使い方ガイド](docs/usage-guide.md)で、横配置・下配置・別タブ・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
 
-[Ticket app iconの10案](docs/icon-concepts.md)は、緑と黄緑の2色・1:1のPNGとSVGです。
+[App icon](docs/app-icon.md)は、緑と黄緑の2色・512×512 pxの透過PNGです。
 
 ## フォルダ構造
 
@@ -54,7 +54,6 @@ herdr-mods-TTJ/
 |   \---workflows
 +---docs
 |   \---assets
-|       +---app-icons
 |       \---guide
 +---layouts
 +---mods

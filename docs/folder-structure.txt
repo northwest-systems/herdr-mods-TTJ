@@ -10,35 +10,11 @@ herdr-mods-TTJ/
 |           ci.yml
 |
 +---docs
+|   |   app-icon.md
 |   |   folder-structure.txt
-|   |   icon-concepts.md
 |   |   usage-guide.md
 |   |
 |   \---assets
-|       +---app-icons
-|       |       01-stub.png
-|       |       01-stub.svg
-|       |       02-upright.png
-|       |       02-upright.svg
-|       |       03-stack.png
-|       |       03-stack.svg
-|       |       04-diagonal.png
-|       |       04-diagonal.svg
-|       |       05-check.png
-|       |       05-check.svg
-|       |       06-flow.png
-|       |       06-flow.svg
-|       |       07-outline.png
-|       |       07-outline.svg
-|       |       08-inverse.png
-|       |       08-inverse.svg
-|       |       09-square.png
-|       |       09-square.svg
-|       |       10-fold.png
-|       |       10-fold.svg
-|       |       overview.png
-|       |       overview.svg
-|       |
 |       \---guide
 |               open-bottom.png
 |               open-bottom.svg
@@ -64,6 +40,8 @@ herdr-mods-TTJ/
 |       |   model.js
 |       |
 |       +---assets
+|       |   |   app-icon.png
+|       |   |
 |       |   \---octicons
 |       |           checklist-16.svg
 |       |           LICENSE
