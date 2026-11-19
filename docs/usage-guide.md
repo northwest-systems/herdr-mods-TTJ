@@ -127,7 +127,7 @@ herdr-app do layout.switch --name ttj
 | canvas | Taskを先頭にTicketとdependsを表示。背景のdrag・wheelで移動 |
 | list | Task／Ticketを切り替え、行をクリックして詳細 |
 
-表示形式・listの種類・canvasの位置とzoomはProjectごとに保持します。canvasは＋／−、修飾キー付きwheel、pinchで拡大縮小でき、resetで初期位置へ戻せます。
+表示形式・listの種類・canvasの位置とzoomはProjectごとに保持します。canvasは＋／−、修飾キー付きwheelで拡大縮小でき、resetで初期位置へ戻せます。
 
 カードはobjective・summary・statusを簡潔に表示します。カードや行をクリックすると、一定サイズの詳細モーダルが開きます。内容が多い場合はモーダル内をscrollします。
 

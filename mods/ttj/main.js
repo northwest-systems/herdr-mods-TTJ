@@ -236,7 +236,6 @@ export default class TTJ extends View {
         if (event.modifiers.control || event.modifiers.platform) this.zoom(Math.exp(event.delta.y*.002),cx,event.local_position);
         else {state.x+=event.delta.x;state.y+=event.delta.y;this.saveView();cx.notify();}
       })
-      .on_pinch((event,cx)=>{cx.stop_propagation();this.zoom(1+event.delta,cx,event.local_position);})
       .children(edges).children(nodes)
       .when(!nodes.length,el=>el.child(div().p(20).text_size(12).text_color(t.muted).child(this.snapshot?.tasks.length ? "表示条件に一致するTask・Ticketはありません。" : "＋からTaskを作成してください。")));
   }
