@@ -11,7 +11,10 @@ cp "$source_root/THIRD_PARTY_NOTICES.txt" "$herdr_app_home/mods/ttj/"
 if [ "$#" -gt 0 ]; then
     test -f "$1"
     mkdir -p "$herdr_app_home/mods/ttj/bin"
-    cp "$1" "$herdr_app_home/mods/ttj/bin/ttjcore"
-    chmod +x "$herdr_app_home/mods/ttj/bin/ttjcore"
+    core_target="$herdr_app_home/mods/ttj/bin/ttjcore"
+    if [ ! -f "$core_target" ] || ! cmp -s "$1" "$core_target"; then
+        cp "$1" "$core_target"
+    fi
+    chmod +x "$core_target"
 fi
 printf '%s\n' 'Installed TTJ Mod and layouts.'

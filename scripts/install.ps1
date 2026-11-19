@@ -16,6 +16,10 @@ if ($CorePath) {
     if ($coreFile.PSIsContainer) { throw 'CorePath must name the Core executable.' }
     $bin = Join-Path $modTarget 'bin'
     New-Item -ItemType Directory -Force -Path $bin | Out-Null
-    Copy-Item -LiteralPath $coreFile.FullName -Destination (Join-Path $bin 'ttjcore.exe') -Force
+    $coreTarget = Join-Path $bin 'ttjcore.exe'
+    if (-not (Test-Path -LiteralPath $coreTarget) -or
+        (Get-FileHash -LiteralPath $coreFile.FullName).Hash -ne (Get-FileHash -LiteralPath $coreTarget).Hash) {
+        Copy-Item -LiteralPath $coreFile.FullName -Destination $coreTarget -Force
+    }
 }
 Write-Output 'Installed TTJ Mod and layouts.'

@@ -1,6 +1,7 @@
 import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex, Button, InputState, Input, TextareaState, Textarea } from "gpui-base";
-import { exec, theme, checking, props as modProps, appHome, openOverlay, closeOverlay, shared, setShared, nextCommand } from "herdr";
+import * as herdr from "herdr";
+const { exec, theme, props:modProps, appHome, openOverlay, closeOverlay, shared, setShared, nextCommand } = herdr;
 import { platform } from "process";
 import { exists } from "fs/promises";
 import { createClient } from "./client.js";
@@ -26,7 +27,7 @@ export default class TTJ extends View {
     this.error="";this.busy=false;this.closed=false;this.token=0;this.watchToken=0;this.drag=null;
     this.preferences=settings();this.settingsStamp=JSON.stringify(this.preferences);
     if (["settings","create","edit","delete","status"].includes(this.screen)) this.buildForm(this.screen,this.config.kind,this.config.entry,cx);
-    if (checking()) return;
+    if (herdr.checking?.()) return;
     cx.spawn(async cx=>{
       while (!this.closed) {
         await nextCommand();
@@ -235,7 +236,6 @@ export default class TTJ extends View {
         if (event.modifiers.control || event.modifiers.platform) this.zoom(Math.exp(event.delta.y*.002),cx,event.local_position);
         else {state.x+=event.delta.x;state.y+=event.delta.y;this.saveView();cx.notify();}
       })
-      .on_pinch((event,cx)=>{cx.stop_propagation();this.zoom(1+event.delta,cx,event.local_position);})
       .children(edges).children(nodes)
       .when(!nodes.length,el=>el.child(div().p(20).text_size(12).text_color(t.muted).child(this.snapshot?.tasks.length ? "表示条件に一致するTask・Ticketはありません。" : "＋からTaskを作成してください。")));
   }

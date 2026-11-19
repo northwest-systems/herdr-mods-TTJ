@@ -10,7 +10,7 @@ TTJCore 0.1.0とHerdr 0.1.15以降を使用する。Modリポジトリで、Powe
 ユーザーの目的に合わせて操作を案内する。
 
 - ProjectタブはCoreのProject名。右上の＋でProjectを作成し、ツールバーからTask、所属Taskを1つ選んでTicketと順序付きJobを作る。IDの手入力は不要。
-- canvasはTaskが先頭でTicketへ分岐する。背景のdrag・wheelで移動し、＋／−・修飾キー付きwheel・pinchで拡大縮小する。表示・位置はProjectごとに保持する。
+- canvasはTaskが先頭でTicketへ分岐する。背景のdrag・wheelで移動し、＋／−・修飾キー付きwheelで拡大縮小する。表示・位置はProjectごとに保持する。
 - canvas・listのフィルターアイコンは、未着手・作業中のTask／Ticketだけに絞る。再度押すと全表示に戻り、選択はProjectごとに保持する。timelineの履歴は全件表示する。
 - カードやlistの行を開いて詳細を読む。Ticket詳細のJobは全件を実行順に並べる。Jobをクリックするとcriteria・instructions・result・Runを確認できる。nametagはhoverでID、クリックでコピー。
 - 編集・statusの変更・削除は詳細の右上。操作者は設定、reasonは操作ごとに入力する。削除は配下をcompletedまたはcanceledにしてから行う。conflict時は最新内容を読み直す。
