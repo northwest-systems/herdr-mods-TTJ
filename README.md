@@ -42,7 +42,7 @@ herdr-app do layout.switch --name ttj
 
 [画像付き使い方ガイド](docs/usage-guide.md)で、横配置・下配置・別タブ・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
 
-[App icon](docs/app-icon.md)は、緑と黄緑の2色・512×512 pxの透過PNGです。
+[App icon](docs/app-icon.md)は、ライト用・ダーク用・単色の黒・白を用意した512×512 pxの透過PNGです。
 
 ## フォルダ構造
 

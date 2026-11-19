@@ -40,6 +40,9 @@ herdr-mods-TTJ/
 |       |   model.js
 |       |
 |       +---assets
+|       |   |   app-icon-black.png
+|       |   |   app-icon-light.png
+|       |   |   app-icon-white.png
 |       |   |   app-icon.png
 |       |   |
 |       |   \---octicons
