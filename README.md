@@ -43,6 +43,8 @@ herdr-app do layout.switch --name ttj
 3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。
 4. 標準接続はCoreの初期化・起動・接続を自動で行います。標準接続ではinit・serveを手動実行したり、profileを指定したりする必要はありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
 
+キャンバス・リストは、ヘッダーのフィルターアイコンで「作業対象のみ」と全表示を切り替えられます。作業対象は未着手・作業中のTask／Ticketです。表示条件はProjectごとに保持します。
+
 ## 使い方ガイド
 
 [画像付き使い方ガイド](docs/usage-guide.md)で、横配置・下配置・別タブ・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
@@ -98,6 +100,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── book.svg                # Project Knowledgeのアイコン
 │       │   ├── close.svg               # 閉じるのアイコン
 │       │   ├── edit.svg                # 編集のアイコン
+│       │   ├── filter.svg              # 作業対象の表示切替アイコン
 │       │   ├── folder.svg              # Projectの詳細のアイコン
 │       │   ├── list.svg                # リスト表示のアイコン
 │       │   ├── minus.svg               # 縮小のアイコン

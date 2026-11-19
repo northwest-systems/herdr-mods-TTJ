@@ -60,7 +60,11 @@ export function visibleJobs(jobs) {
   return jobs.slice(Math.max(0,current-6),Math.min(jobs.length,current+2));
 }
 
-export function ticketCanvas(snapshot) {
+export function workVisible(record, {workOnly=false}={}) {
+  return !workOnly || record.status==="todo" || record.status==="doing";
+}
+
+export function ticketCanvas(snapshot, visibility={}) {
   const items=tickets(snapshot),byId=new Map(items.map(item=>[item.ticket.record.id,item]));
   const ranks=new Map(),visiting=new Set();
   function rank(id) {
@@ -87,7 +91,8 @@ export function ticketCanvas(snapshot) {
     const parents=dependencies.length ? dependencies.map(id=>placed.get(id)) : [tasksById.get(to.entry.record.task)];
     return parents.filter(Boolean).map(from=>({from,to}));
   });
-  const all=[...taskNodes,...nodes];
-  return {nodes:all,edges,width:Math.max(48,...all.map(n=>n.x+n.width+24)),
+  const all=[...taskNodes,...nodes].filter(node=>workVisible(node.entry.record,visibility));
+  const visible=new Set(all.map(node=>node.entry.record.id));
+  return {nodes:all,edges:edges.filter(({from,to})=>visible.has(from.entry.record.id) && visible.has(to.entry.record.id)),width:Math.max(48,...all.map(n=>n.x+n.width+24)),
     height:Math.max(48,...all.map(n=>n.y+n.height+24))};
 }

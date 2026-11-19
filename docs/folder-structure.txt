@@ -42,6 +42,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── book.svg                # Project Knowledgeのアイコン
 │       │   ├── close.svg               # 閉じるのアイコン
 │       │   ├── edit.svg                # 編集のアイコン
+│       │   ├── filter.svg              # 作業対象の表示切替アイコン
 │       │   ├── folder.svg              # Projectの詳細のアイコン
 │       │   ├── list.svg                # リスト表示のアイコン
 │       │   ├── minus.svg               # 縮小のアイコン
