@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createClient, PROTOCOL } from "../mods/ttj/client.js";
-import { timeline, ticketCanvas, visibleJobs } from "../mods/ttj/model.js";
+import { timeline, ticketCanvas, visibleJobs, workVisible } from "../mods/ttj/model.js";
 test("passes JSON as a separate argument without invoking a shell", async () => {
  let call;const client=createClient(async(...args)=>{call=args;return{code:0,stdout:JSON.stringify({jsonrpc:"2.0",protocol:PROTOCOL,id:1,result:{items:[]}})};},{command:"core-command",args:["prefix"],autoStart:false});
  const id='project"; echo example';assert.deepEqual(await client("project.snapshot",{id}),{items:[]});
@@ -54,4 +54,22 @@ test("initializes a shared Core once before concurrent calls",async()=>{
  await Promise.all([client("project.list"),client("rpc.discover")]);
  assert.equal(calls.filter(args=>args.at(-1)==="ensure").length,1);
  assert.deepEqual(calls[0],["--home","example-profile","ensure"]);
+});
+
+test("focuses on todo and doing work without hiding active children or inventing edges",()=>{
+ const statuses=["todo","doing","waiting","paused","blocked","completed","canceled"];
+ assert.deepEqual(statuses.filter(status=>workVisible({status})),statuses);
+ assert.deepEqual(statuses.filter(status=>workVisible({status},{workOnly:true})),["todo","doing"]);
+ const ticket=(id,status,depends=[])=>({ticket:{record:{id,status,task:"task",depends}},jobs:[]});
+ const snapshot={tasks:[
+   {task:{record:{id:"task",status:"doing"}},tickets:[ticket("done","completed"),ticket("wait","waiting",["done"]),ticket("active","doing",["wait"]),ticket("next","todo",["active"]),ticket("canceled","canceled")]},
+   {task:{record:{id:"waiting-task",status:"waiting"}},tickets:[{ticket:{record:{id:"active-child",status:"doing",task:"waiting-task"}},jobs:[]}]},
+   {task:{record:{id:"done-task",status:"completed"}},tickets:[]},
+ ]};
+ const before=JSON.stringify(snapshot);
+ const scene=ticketCanvas(snapshot,{workOnly:true});
+ assert.deepEqual(new Set(scene.nodes.map(node=>node.entry.record.id)),new Set(["task","active","next","active-child"]));
+ assert.deepEqual(scene.edges.map(({from,to})=>[from.entry.record.id,to.entry.record.id]),[["active","next"]]);
+ assert.equal(JSON.stringify(snapshot),before);
+ assert.equal(ticketCanvas(snapshot).nodes.length,9);
 });

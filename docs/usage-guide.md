@@ -131,6 +131,12 @@ herdr-app do layout.switch --name ttj
 
 カードはobjective・summary・statusを簡潔に表示します。カードや行をクリックすると、一定サイズの詳細モーダルが開きます。内容が多い場合はモーダル内をscrollします。
 
+## 作業対象だけ表示する
+
+キャンバス・リストのヘッダーにあるフィルターアイコンを押すと、未着手（todo）・作業中（doing）のTask／Ticketだけを表示します。待機・保留・障害・完了・中止の項目を隠し、もう一度押すと全表示に戻します。初期状態は全表示です。
+
+選択はProjectごとに保持します。待機中のTaskの配下にあっても、未着手・作業中のTicketは表示します。非表示のカードにつながる線は隠します。タイムラインには全履歴を表示し、詳細ではJobと実行履歴を確認できます。
+
 ## Jobと詳細
 
 Jobのiconにはstatus色のringが付きます。クリックするとcriteria・instructions・result・Runを確認できます。Ticket詳細のJob一覧は全件を実行順に表示します。

@@ -4,7 +4,7 @@ import { exec, theme, checking, props as modProps, appHome, openOverlay, closeOv
 import { platform } from "process";
 import { exists } from "fs/promises";
 import { createClient } from "./client.js";
-import { STATUS, tickets, timeline, entityMap, ticketCanvas, visibleJobs, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
+import { STATUS, tickets, timeline, entityMap, ticketCanvas, visibleJobs, workVisible, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
 
 const KIND_NAMES={project:"Project",task:"Task",ticket:"Ticket",job:"Job",run:"Run",knowledge:"Knowledge"};
 const VIEWS=[["timeline","タイムライン"],["tree","キャンバス"],["list","リスト"]];
@@ -61,7 +61,8 @@ export default class TTJ extends View {
     if (!this.states.has(key)) {
       let saved={};try {saved=JSON.parse(localStorage.getItem("ttj-view:"+key) || "{}");} catch {}
       this.states.set(key,{view:VIEWS.some(([id])=>id===saved.view) ? saved.view : "tree",
-        list:saved.list==="task" ? "task" : "ticket",zoom:saved.zoom ?? 1,x:saved.x ?? 0,y:saved.y ?? 0});
+        list:saved.list==="task" ? "task" : "ticket",workOnly:saved.workOnly===true,
+        zoom:saved.zoom ?? 1,x:saved.x ?? 0,y:saved.y ?? 0});
     }
     return this.states.get(key);
   }
@@ -190,7 +191,7 @@ export default class TTJ extends View {
     this.saveView();cx.notify();
   }
   tree(t) {
-    const scene=ticketCanvas(this.snapshot),state=this.state(),z=state.zoom;
+    const state=this.state(),scene=ticketCanvas(this.snapshot,state),z=state.zoom;
     const horizontal=(left,right,y)=>div().absolute().left(left*z+state.x).top((y-.5)*z+state.y)
       .w((right-left)*z).h(z).bg(t.muted);
     const vertical=(x,top,bottom)=>div().absolute().left((x-.5)*z+state.x).top(top*z+state.y)
@@ -236,7 +237,7 @@ export default class TTJ extends View {
       })
       .on_pinch((event,cx)=>{cx.stop_propagation();this.zoom(1+event.delta,cx,event.local_position);})
       .children(edges).children(nodes)
-      .when(!nodes.length,el=>el.child(div().p(20).text_size(12).text_color(t.muted).child("＋からTaskを作成してください。")));
+      .when(!nodes.length,el=>el.child(div().p(20).text_size(12).text_color(t.muted).child(this.snapshot?.tasks.length ? "表示条件に一致するTask・Ticketはありません。" : "＋からTaskを作成してください。")));
   }
   scroll(id,rows,t,empty="項目はありません。") {
     return v_flex().id(id).w_full().flex_1().min_h(0).overflow_y_scrollbar().p(10).gap(4)
@@ -245,8 +246,8 @@ export default class TTJ extends View {
   list(t) {
     const task=this.state().list==="task",kind=task ? "task" : "ticket";
     const entries=task ? (this.snapshot?.tasks ?? []).map(item=>item.task) : tickets(this.snapshot).map(item=>item.ticket);
-    return this.scroll("ttj-list",entries.map(entry=>this.row("list-"+entry.record.id,entry.record.objective,entry.record.status,
-      cx=>this.openRecord(kind,entry.record.id,cx),t)),t);
+    return this.scroll("ttj-list",entries.filter(entry=>workVisible(entry.record,this.state())).map(entry=>this.row("list-"+entry.record.id,entry.record.objective,entry.record.status,
+      cx=>this.openRecord(kind,entry.record.id,cx),t)),t,"表示条件に一致するTask・Ticketはありません。");
   }
   events(t) {
     return this.scroll("ttj-events",timeline(this.snapshot).map(event=>
@@ -491,6 +492,9 @@ export default class TTJ extends View {
       .child(h_flex().w_full().h(34).flex_none().px(10).gap(4).items_center().bg(t.surface)
         .child(image(t.dark ? "mods/ttj/assets/app-icon.png" : "mods/ttj/assets/app-icon-light.png").size(28).flex_none().accessibility_label("TTJ"))
         .child(div().flex_1())
+        .when(state.view!=="timeline",el=>el.child(this.button("work-only","filter",
+          state.workOnly ? "すべてのTask・Ticketを表示" : "作業対象のみ表示（未着手・作業中）",
+          cx=>this.choose("workOnly",!state.workOnly,cx),t,state.workOnly,!this.project)))
         .child(this.button("project-new","plus","Projectを作成",()=>this.overlay("create","project"),t))
         .child(this.button("project-details","folder","Projectの詳細",cx=>this.openRecord("project",this.project,cx),t,false,!this.project))
         .child(this.button("project-knowledge","book","Project Knowledge",()=>this.overlay("knowledge"),t,false,!this.project))
