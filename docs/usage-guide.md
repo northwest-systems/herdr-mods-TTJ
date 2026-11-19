@@ -137,7 +137,7 @@ Jobのiconにはstatus色のringが付きます。クリックするとcriteria�
 
 カードのJobは左詰めで最大8個です。8個を超える場合はdoingのJobと最大6個の前工程、次の1個を表示します。最後のJobがdoingなら7個です。doingがない場合は最初のcompleted・canceled以外のJob、すべてcompleted・canceledなら最後を基準にします。
 
-nametagはhoverでID、クリックでコピーします。Projectのknowledgeは本のアイコンから開き、Ticketのhandoffs・resumeはTicket詳細で確認します。
+nametagはhoverでID、クリックでコピーします。ProjectのKnowledgeは本のアイコンから開き、Ticketのhandoffs・resumeはTicket詳細で確認します。
 
 ## 作成・編集・削除
 

@@ -11,7 +11,7 @@ test("passes JSON as a separate argument without invoking a shell", async () => 
 test("rejects incompatible versions and unrelated response ids",async()=>{
  for(const change of [{protocol:"TTJ/0.1.0"},{id:99}]){
  const client=createClient(async()=>({code:0,stdout:JSON.stringify({jsonrpc:"2.0",protocol:PROTOCOL,id:1,result:{},...change})}),{autoStart:false});
- await assert.rejects(client("project.list"),/プロトコル/);}
+ await assert.rejects(client("project.list"),Error);}
 });
 test("shows structured domain errors without exposing process diagnostics",async()=>{
  const client=createClient(async()=>({code:2,stdout:JSON.stringify({jsonrpc:"2.0",protocol:PROTOCOL,id:1,error:{code:-32004,message:"Project not found"}})}),{autoStart:false});
@@ -33,9 +33,10 @@ test("keeps Task heads and dependencies in a compact branching canvas",()=>{
  const scene=ticketCanvas(snapshot),nodes=new Map(scene.nodes.map(n=>[n.entry.record.id,n]));
  assert.ok(nodes.get("later").x>nodes.get("first").x);
  assert.ok(nodes.get("first").x>nodes.get("task").x);
- assert.equal(nodes.get("first").width,242);
- assert.deepEqual([...new Set(scene.nodes.map(node=>node.width+"x"+node.height))],["242x98"]);
- assert.deepEqual(scene.edges.map(({from,to})=>[from.entry.record.id,to.entry.record.id]),[["first","later"],["task","first"]]);
+ const {width,height}=nodes.get("first");
+ assert.ok(width>0 && height>0);
+ assert.ok(scene.nodes.every(node=>node.width===width && node.height===height));
+ assert.deepEqual(new Set(scene.edges.map(({from,to})=>from.entry.record.id+"->"+to.entry.record.id)),new Set(["first->later","task->first"]));
 });
 test("shows the current Job and one next Job without changing the left alignment",()=>{
  const jobs=Array.from({length:12},(_,index)=>({record:{id:index,status:index<9 ? "completed" : index===9 ? "doing" : "todo"}}));

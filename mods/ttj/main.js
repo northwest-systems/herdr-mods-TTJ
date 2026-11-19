@@ -6,6 +6,7 @@ import { exists } from "fs/promises";
 import { createClient } from "./client.js";
 import { STATUS, tickets, timeline, entityMap, ticketCanvas, visibleJobs, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
 
+const KIND_NAMES={project:"Project",task:"Task",ticket:"Ticket",job:"Job",run:"Run",knowledge:"Knowledge"};
 const VIEWS=[["timeline","タイムライン"],["tree","キャンバス"],["list","リスト"]];
 const LABELS={name:"名前",objective:"目標",summary:"概要",criteria:"完了条件（1行に1つ）",deadline:"期限（タイムゾーン付き日時）",
   instructions:"手順",assignee:"担当（1行に1人）",handoffs:"申し送り（1行に1件）",resume:"再開条件",priority:"優先度",
@@ -309,7 +310,7 @@ export default class TTJ extends View {
       if (["project","task","ticket"].includes(entry?.kind))
         actions.push(this.button("detail-delete","trash","論理削除",cx=>this.buildForm("delete",entry.kind,entry.entry,cx),t));
     }
-    return this.modal(record?.objective ?? record?.name ?? event?.title ?? "詳細",record?.status,
+    return this.modal(record?.objective ?? record?.name ?? event?.title ?? KIND_NAMES[entry?.kind] ?? "詳細",record?.status,
       this.scroll("detail-fields",fields,t,"この項目は削除されたか、現在のProjectにありません。"),actions,t);
   }
   input(name,value="",multi=false) {
@@ -471,14 +472,14 @@ export default class TTJ extends View {
     if (f.kind==="ticket" && screen==="create") rows.push(this.button("add-job","plus","Jobを追加",cx=>this.addJob(cx),t));
     if (this.detailRef) actions.push(this.button("form-back","back","詳細に戻る",cx=>{this.screen="detail";this.releaseInputs();cx.notify();},t));
     actions.push(this.button("form-save",screen==="delete" ? "trash" : "save",screen==="delete" ? "論理削除を確定" : "保存",cx=>this.submit(cx),t,false,this.busy || Boolean(stale)));
-    const title=screen==="settings" ? "設定" : (f.kind ?? "")+" · "+({create:"作成",edit:"編集",delete:"論理削除",status:"状態変更"}[screen] ?? "");
+    const title=screen==="settings" ? "設定" : (KIND_NAMES[f.kind] ?? "")+" · "+({create:"作成",edit:"編集",delete:"論理削除",status:"状態変更"}[screen] ?? "");
     return this.modal(title,f.entry?.record.status,this.scroll("form-fields",rows,t),actions,t);
   }
   knowledge(t) {
     const rows=(this.snapshot?.knowledge ?? []).map(entry=>this.row("knowledge-"+entry.record.id,entry.record.content,entry.record.status,
       cx=>this.openRecord("knowledge",entry.record.id,cx),t));
-    return this.modal("Project knowledge",null,this.scroll("knowledge-list",rows,t),[
-      this.button("knowledge-add","plus","Projectの記録を作成",cx=>this.buildForm("create","knowledge",null,cx),t)],t);
+    return this.modal("Project Knowledge",null,this.scroll("knowledge-list",rows,t),[
+      this.button("knowledge-add","plus","Knowledgeを作成",cx=>this.buildForm("create","knowledge",null,cx),t)],t);
   }
   render(cx) {
     const t=this.colors(cx);
@@ -492,7 +493,7 @@ export default class TTJ extends View {
         .child(div().flex_1())
         .child(this.button("project-new","plus","Projectを作成",()=>this.overlay("create","project"),t))
         .child(this.button("project-details","folder","Projectの詳細",cx=>this.openRecord("project",this.project,cx),t,false,!this.project))
-        .child(this.button("project-knowledge","book","Project knowledge",()=>this.overlay("knowledge"),t,false,!this.project))
+        .child(this.button("project-knowledge","book","Project Knowledge",()=>this.overlay("knowledge"),t,false,!this.project))
         .child(this.button("settings","settings","設定",()=>this.overlay("settings"),t)))
       .child(h_flex().id("project-tabs").w_full().h(30).flex_none().px(8).gap(4).items_center().overflow_x_scrollbar()
         .children(this.projects.map(entry=>this.tab("pj-"+entry.record.id,entry.record.name,cx=>this.refresh(cx,entry.record.id),t,this.project===entry.record.id)))

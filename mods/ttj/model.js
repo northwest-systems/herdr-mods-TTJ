@@ -5,7 +5,7 @@ export const STATUS = {
 const EVENTS = {
   "record.created":"作成", "record.updated":"更新", "record.deleted":"削除",
   "status.changed":"状態変更", "run.started":"実行開始", "run.finished":"実行終了",
-  "execution.stop_requested":"停止要求", "knowledge.superseded":"知識の置換",
+  "execution.stop_requested":"停止要求", "knowledge.superseded":"Knowledgeの置換",
 };
 export const JOB_COLORS = {
   todo:"#64748b", doing:"#2563eb", waiting:"#b45309", paused:"#7c3aed",
