@@ -5,7 +5,10 @@
     {
       "id": "ttj-panel",
       "type": "block",
-      "content": { "mod": "ttj", "props": { "command": "ttjcore", "args": [] } }
+      "min": 240,
+      "content": {
+        "mod": "ttj"
+      }
     }
   ]
 }

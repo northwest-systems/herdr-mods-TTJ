@@ -1,0 +1,27 @@
+[
+  {
+    "file": "LICENSE",
+    "source": "https://github.com/primer/octicons/blob/main/LICENSE",
+    "git_blob_sha": "aa1fa80ed83cf856fb31c22ba56557c42ca84488"
+  },
+  {
+    "file": "checklist-16.svg",
+    "source": "https://github.com/primer/octicons/blob/main/icons/checklist-16.svg",
+    "git_blob_sha": "34ad42fd6d13595b7d05c2aa11df876a4ae72414"
+  },
+  {
+    "file": "tag-16.svg",
+    "source": "https://github.com/primer/octicons/blob/main/icons/tag-16.svg",
+    "git_blob_sha": "d74c2b2efb6a8ffea768f1f6e8432d417743e7af"
+  },
+  {
+    "file": "star-16.svg",
+    "source": "https://github.com/primer/octicons/blob/main/icons/star-16.svg",
+    "git_blob_sha": "08adb3e775d339e77d5afad79bf25675199781cd"
+  },
+  {
+    "file": "mark-github-16.svg",
+    "source": "https://github.com/primer/octicons/blob/main/icons/mark-github-16.svg",
+    "git_blob_sha": "0e55a8ef2db1913cb35f81ae09ffdb58b5422319"
+  }
+]

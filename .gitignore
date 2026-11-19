@@ -3,3 +3,4 @@ node_modules/
 *.error
 mods/ttj/gpui-kit.d.ts
 mods/ttj/jsconfig.json
+mods/ttj/bin/

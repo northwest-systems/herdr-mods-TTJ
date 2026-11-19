@@ -1,100 +1,126 @@
 # Herdr TTJ Mod
 
-Projectを選択し、タイムライン・Task／Ticketツリー・リストのいずれかをウインドウ全体に表示するHerdr Modです。リストはTask／Ticketを切り替えられます。表示形式とリストの種類はProjectごとに保持します。
+## 概要
 
-行には目標・種類・状態など最小限の情報を表示し、クリックすると詳細モーダルを開きます。Ticketの詳細からJobも確認できます。操作ボタンはアイコンとツールチップを使い、横並びのボタン・チップは種類ごとに等幅です。Project選択には名前を表示します。
+TTJCore 0.1.0を使い、Projectごとのタイムライン・TaskからTicketへ分岐するキャンバス・Task／Ticketリストを切り替えるHerdr Modです。バージョンは0.1.0です。Windows・Linux・macOSのHerdr 0.1.15以降を対象にします。
 
-常駐する[TTJCore](https://github.com/northwest-systems/TTJCore)から変更通知を待ち受け、履歴や実行状態を更新します。作成・編集・状態変更はCoreのCLIで行います。
+Project・Task・Ticketの作成・参照・編集・論理削除、状態変更、Projectのknowledge作成・参照に対応します。IDはCoreが自動発行します。Ticketは1つのTaskに所属し、Jobの構成・順序はTicket作成後に固定されます。
 
-Herdr 0.1.15のネイティブGPUIを使用します。Windows・Linux・macOSが対象です。Webサーバーやブラウザー、JavaScriptのランタイム依存パッケージは不要です。
+Coreが確定した変更を待ち受け、カード・一覧・開いている詳細に反映します。Coreとの通信はローカルIPCです。Webサーバーやブラウザー、npmの実行時依存パッケージは使用しません。
 
-## 準備
+## クイックスタート
 
-1. TTJCoreをビルドし、実行ファイルをPATHから起動できるようにします。
-2. TTJCoreのREADMEに従ってDBを初期化し、ttjcore serveを起動しておきます。別の端末からCoreのCLIでProject・Task・Ticketを作成します。
-3. TTJCORE_HOMEを指定する場合は、serve・CLI・Herdrで同じ値を使います。Herdrが必要なのはCoreへの接続設定で、DB接続URLはserveにだけ設定します。
+1. [TTJCoreのクイックスタート](https://github.com/northwest-systems/TTJCore#クイックスタート)に従ってCore 0.1.0をインストールし、Herdrから`ttjcore`を起動できるPATHを用意します。インストール時にはRust・Cコンパイラーを使いますが、Modの利用時には不要です。
+2. Herdrをインストールし、次のコマンドでModを配置します。インストールスクリプトはこのリポジトリのModと3つのレイアウトをHerdrの設定フォルダーへコピーします。パッケージのダウンロードは行いません。同名のファイルは更新されます。
 
-ModはHerdrのexec APIでTTJCore CLIを起動し、JSON-RPC応答を標準出力から受け取ります。外部プログラムを実行するModなので、信頼できるTTJCoreを指定してください。
+```sh
+git clone https://github.com/northwest-systems/herdr-mods-TTJ.git
+cd herdr-mods-TTJ
+git checkout v0.1.0
+```
 
-## インストール
+PowerShell 7:
 
-設定フォルダーはHERDR_APP_HOME、XDG_CONFIG_HOME/herdr-app、$HOME/.config/herdr-appの順で選びます。既存のttj Modやレイアウトがある場合は、内容を確認してから更新してください。
-
-PowerShell:
-
-~~~powershell
-$herdrAppHome = if ($env:HERDR_APP_HOME) {
-    $env:HERDR_APP_HOME
-} elseif ($env:XDG_CONFIG_HOME) {
-    Join-Path $env:XDG_CONFIG_HOME 'herdr-app'
-} else {
-    Join-Path $HOME '.config/herdr-app'
-}
-New-Item -ItemType Directory -Force -Path (Join-Path $herdrAppHome 'mods'), (Join-Path $herdrAppHome 'layouts') | Out-Null
-Copy-Item -LiteralPath 'mods/ttj' -Destination (Join-Path $herdrAppHome 'mods/ttj') -Recurse
-Copy-Item -LiteralPath 'layouts/ttj.json' -Destination (Join-Path $herdrAppHome 'layouts/ttj.json')
-herdr-app check (Join-Path $herdrAppHome 'mods/ttj')
+```powershell
+pwsh -File scripts/install.ps1
 herdr-app do layout.switch --name ttj
-~~~
+```
 
 Linux・macOS:
 
-~~~sh
-herdr_app_home="$HERDR_APP_HOME"
-if [ -z "$herdr_app_home" ]; then
-    if [ -n "$XDG_CONFIG_HOME" ]; then
-        herdr_app_home="$XDG_CONFIG_HOME/herdr-app"
-    else
-        herdr_app_home="$HOME/.config/herdr-app"
-    fi
-fi
-mkdir -p "$herdr_app_home/mods" "$herdr_app_home/layouts"
-cp -R mods/ttj "$herdr_app_home/mods/ttj"
-cp layouts/ttj.json "$herdr_app_home/layouts/ttj.json"
-herdr-app check "$herdr_app_home/mods/ttj"
+```sh
+sh scripts/install.sh
 herdr-app do layout.switch --name ttj
-~~~
+```
 
-## 接続設定
+設定フォルダーは`HERDR_APP_HOME`、`XDG_CONFIG_HOME/herdr-app`、`$HOME/.config/herdr-app`の順で選びます。CoreをPATHへ追加する代わりに、PowerShellでは`-CorePath /path/to/ttjcore.exe`、shでは第1引数にCore実行ファイルを指定すると、Modのbinへ同梱できます。
 
-レイアウトのcontent.propsで次を指定できます。
+3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。
+4. 標準接続はCoreの初期化・起動・接続を自動で行います。Coreのinit・serve・プロファイルの知識は日常操作に必要ありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
 
-| 項目 | 既定値 | 用途 |
-|---|---|---|
-| command | ttjcore | 実行ファイル名またはそのパス |
-| args | [] | callより前に渡す固定引数 |
-| project | 未指定 | 初期表示するProject ID |
+## フォルダ構造
 
-commandとargsは別々に渡し、シェルを介して実行しません。TTJCORE_HOMEを変更した場合はHerdrをその環境で再起動してください。WindowsからWSL上のCoreへ接続する場合は、commandをwsl.exeにし、argsで実行ディレクトリ・TTJCORE_HOME・Coreの実行ファイルを明示します。
+```text
+mods/ttj/
+  main.js     Herdrの画面・入力・詳細モーダル
+  model.js    キャンバス配置・Jobの表示範囲・履歴表示
+  client.js   Coreの自動起動とJSON-RPC呼び出し
+  icons/      操作用アイコン
+  assets/octicons/  Job・GitHub・nametagの例とライセンス
+  mod.json    Herdr Modの設定
+layouts/
+  ttj.json        TTJ専用ウインドウ向け
+  ttj-side.json   Herdrの横にTTJ
+  ttj-bottom.json Herdrの下にTTJ
+scripts/      PowerShell・shのインストール処理
+skills/herdr-ttj/ LLM向け利用スキル
+tests/        接続・履歴・配置・Job表示のテスト
+```
 
-~~~json
-{
-  "content": {
-    "mod": "ttj",
-    "props": {
-      "command": "/path/to/ttjcore",
-      "args": [],
-      "project": "demo-project"
-    }
-  }
-}
-~~~
+## 画面の使い方
 
-Coreに接続できない場合はエラーを表示します。まずserveの起動状態とTTJCORE_HOMEの一致を確認してください。同じProjectの取得済みデータはエラー表示とともに残し、別Projectを選ぶと取得済みデータを消して読み直します。削除済み作業はツリー・リストから除外され、履歴には残ります。
+| 操作 | 表示・動作 |
+|---|---|
+| Projectタブ | CoreのProject名を表示。表示形式・リスト種別・キャンバス位置をProjectごとに保持 |
+| タイムライン | 実行・状態変更の履歴。行をクリックすると操作者・理由・変更内容 |
+| キャンバス | Taskが先頭ノードとなり、Ticketの依存関係を矢印で表示 |
+| リスト | Task／Ticketを切り替え。行をクリックして詳細 |
+| カード／行 | タイトル・概要・状態を簡潔に表示。詳細は固定サイズのモーダルでスクロール |
+| Jobアイコン | 状態色の太いリング。クリックで手順・条件・結果・実行履歴 |
+| nametag | ホバーでID、クリックでコピー |
+| 本のアイコン | 選択Projectのknowledge。Ticketの申し送りはTicket詳細 |
+| 設定 | 操作者、接続、テーマ、アイコンキーとファイルの対応 |
 
-Modはevents.waitで変更を待ち、通知があったときにスナップショットを更新します。詳細モーダルも更新対象です。LLM側の監視・通知受信はCoreのevents.wait／events.subscribeを直接使ってください。UIからLLMへ状態を転送する機能はありません。
+Task・Ticketカードは内容にかかわらず同じ幅・高さです。キャンバスは背景のドラッグ・ホイールで移動し、＋／−、Ctrlまたはプラットフォーム修飾キー付きホイール、ピンチで拡大縮小します。リセットで初期表示に戻ります。
 
-## 開発・検証
+Jobは左詰めで最大8個です。8個を超える場合、作業中のJobと最大6個の前工程、次の1個を表示します。最後のJobが作業中なら7個です。作業中がなければ最初の非終端Job、全て終端なら最後を基準にします。Job詳細一覧には全件を上から実行順に表示します。
 
-テストにはNode.js 24以降の標準テストランナーを使います。npm installは不要です。
+Taskの目標・完了条件・期限、Ticketの担当・依存・申し送り・再開条件・優先度を編集できます。Ticketの目標とJob計画は固定です。概要・JobアイコンキーはTTJ記録本体とは別の表示情報です。並行する変更と競合した場合は最新内容を読み直します。削除するには対象と配下の作業を完了または中止してください。削除後もCoreに履歴と依存参照が残ります。
 
-~~~sh
+## 接続・テーマ・アイコン
+
+標準接続は、同梱した`mods/ttj/bin/ttjcore`（Windowsは.exe）、次にPATHの`ttjcore`を使います。カスタム接続では実行ファイル・固定引数のJSON配列・プロファイル・自動起動の有無を指定します。引数はシェルを介さず渡します。任意のPostgreSQLはCore側で設定し、ModはそのCoreのプロファイルへ接続します。
+
+テーマはHerdrに従う／ライト／ダークを選べます。ライトのアクセントは濃い緑、ダークは明るい黄緑です。テーマ・接続・操作者・アイコン対応はHerdrアプリ内の共通設定です。
+
+Jobごとに`job`、`github`、`custom.star`などのキーを指定します。設定のJSONで任意キーをSVG／PNGのパスへ対応付けられます。相対パスはHerdrの設定フォルダーから参照します。
+
+```json
+{"custom.build":"mods/ttj/assets/build.svg"}
+```
+
+同梱例はOcticonsのchecklist・GitHubマーク・star・tagです。GitHubマークはGitHub関連のJobを示し、PR専用アイコンではありません。キー`id.copy`はコピーアイコンに使用します。ライセンスとGitHubブランド上の扱いは[THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt)を参照してください。追加するアイコンの利用条件は各提供元に従ってください。
+
+## Herdrと並べて開く
+
+`herdr-app do layout.switch --name ttj-side`で横、`--name ttj-bottom`で下、`--name ttj`で専用画面に切り替えます。レイアウトの`ttj-panel`をリサイズできます。
+
+別のOSウインドウで使う場合は、そのウインドウ用の`HERDR_APP_HOME`へModを配置してHerdrを起動します。同じOSユーザー・Coreプロファイルなら、作業側のHerdrと同じCoreへ接続できます。
+
+```powershell
+$env:HERDR_APP_HOME = Join-Path $HOME '.config/herdr-ttj'
+pwsh -File scripts/install.ps1
+herdr-app
+```
+
+```sh
+HERDR_APP_HOME="$HOME/.config/herdr-ttj" sh scripts/install.sh
+HERDR_APP_HOME="$HOME/.config/herdr-ttj" herdr-app
+```
+
+別ウインドウでも初回はttjレイアウトを選んでください。異なるHerdrアプリ設定フォルダー間では表示設定を共有しません。
+
+## LLMとの連携・開発
+
+LLMはCoreの`events.wait`で監視するか、`rpc`の`events.subscribe`で通知を受け取ります。UIから取得する必要はありません。実行エージェントが`run.start`・`run.finish`・`status.set`で状態を記録するとModへ反映されます。CoreはCodex・Claude Codeのプロセスを自動で検出・操作しません。
+
+利用スキルは[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。テストはNode.js 24以降の標準ランナーを使い、npm installは不要です。Herdrのcheckは生成した型定義を使ってModを確認します。
+
+```sh
 node --test
 herdr-app check mods/ttj
-~~~
-
-接続のない初期画面のチェックに加え、TTJCoreに接続したHerdr画面でProjectごとの表示切り替え、Task／Ticketリスト、折り畳み、詳細モーダル、履歴、CLI更新の反映、接続エラーを確認してください。
+```
 
 ## ライセンス
 
-[Apache-2.0](LICENSE)。[Herdr Modの仕様](https://github.com/herdrdev/herdr-app/blob/master/docs/mods.md)に従います。
+[Apache-2.0](LICENSE)。同梱アイコンには[第三者のライセンス・ブランド条件](THIRD_PARTY_NOTICES.txt)が適用されます。
