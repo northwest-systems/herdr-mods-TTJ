@@ -1,86 +1,75 @@
-herdr-mods-TTJ/
-|   .gitignore
-|   LICENSE
-|   package.json
-|   README.md
-|   THIRD_PARTY_NOTICES.txt
-|
-+---.github
-|   \---workflows
-|           ci.yml
-|
-+---docs
-|   |   app-icon.md
-|   |   folder-structure.txt
-|   |   usage-guide.md
-|   |
-|   \---assets
-|       \---guide
-|               open-bottom.png
-|               open-bottom.svg
-|               open-pane.png
-|               open-pane.svg
-|               open-side.png
-|               open-side.svg
-|               open-tab.png
-|               open-tab.svg
-|               open-window.png
-|               open-window.svg
-|
-+---layouts
-|       ttj-bottom.json
-|       ttj-side.json
-|       ttj.json
-|
-+---mods
-|   \---ttj
-|       |   client.js
-|       |   main.js
-|       |   mod.json
-|       |   model.js
-|       |
-|       +---assets
-|       |   |   app-icon-black.png
-|       |   |   app-icon-light.png
-|       |   |   app-icon-white.png
-|       |   |   app-icon.png
-|       |   |
-|       |   \---octicons
-|       |           checklist-16.svg
-|       |           LICENSE
-|       |           mark-github-16.svg
-|       |           SOURCES.json
-|       |           star-16.svg
-|       |           tag-16.svg
-|       |
-|       \---icons
-|               arrowhead.svg
-|               back.svg
-|               book.svg
-|               close.svg
-|               edit.svg
-|               folder.svg
-|               list.svg
-|               minus.svg
-|               plus.svg
-|               refresh.svg
-|               reset.svg
-|               save.svg
-|               settings.svg
-|               status.svg
-|               task.svg
-|               ticket.svg
-|               timeline.svg
-|               trash.svg
-|               tree.svg
-|
-+---scripts
-|       install.ps1
-|       install.sh
-|
-+---skills
-|   \---herdr-ttj
-|           SKILL.md
-|
-\---tests
-        viewer.test.js
+herdr-mods-TTJ/                         # Herdr用TTJ Mod
+├── .github/                            # GitHubの設定
+│   └── workflows/                      # GitHub Actions
+│       └── ci.yml                      # ビルド・テストのCI
+├── docs/                               # 使い方・配布資料
+│   ├── assets/                         # ドキュメント用画像
+│   │   └── guide/                      # 表示方法の配置図
+│   │       ├── open-bottom.png         # 下配置の配置図
+│   │       ├── open-bottom.svg         # 下配置の配置図ソース
+│   │       ├── open-pane.png           # pane分割の配置図
+│   │       ├── open-pane.svg           # pane分割の配置図ソース
+│   │       ├── open-side.png           # 横配置の配置図
+│   │       ├── open-side.svg           # 横配置の配置図ソース
+│   │       ├── open-tab.png            # 別タブの配置図
+│   │       ├── open-tab.svg            # 別タブの配置図ソース
+│   │       ├── open-window.png         # 別ウインドウの配置図
+│   │       └── open-window.svg         # 別ウインドウの配置図ソース
+│   ├── app-icon.md                     # 共通アイコンの一覧
+│   ├── folder-structure.txt            # コメント付きの全ファイル構造
+│   └── usage-guide.md                  # 画像付き使い方ガイド
+├── layouts/                            # Herdrのレイアウト
+│   ├── ttj-bottom.json                 # Herdrの下に表示
+│   ├── ttj-side.json                   # Herdrの横に表示
+│   └── ttj.json                        # TTJ専用画面
+├── mods/                               # Herdr Mod
+│   └── ttj/                            # TTJのUI
+│       ├── assets/                     # 配布する共通アイコン・Octicons
+│       │   ├── octicons/               # GitHubのOcticons
+│       │   │   ├── checklist-16.svg    # Jobの標準アイコン
+│       │   │   ├── LICENSE             # OcticonsのMITライセンス
+│       │   │   ├── mark-github-16.svg  # GitHubのマーク
+│       │   │   ├── SOURCES.json        # Octiconsの取得元
+│       │   │   ├── star-16.svg         # starアイコン
+│       │   │   └── tag-16.svg          # ID用のnametag
+│       │   ├── app-icon-black.png      # 単色・黒の透過PNG
+│       │   ├── app-icon-light.png      # ライト用の透過PNG
+│       │   ├── app-icon-white.png      # 単色・白の透過PNG
+│       │   └── app-icon.png            # ダーク用の透過PNG
+│       ├── icons/                      # 操作・表示用のSVGアイコン
+│       │   ├── arrowhead.svg           # キャンバスの矢じりのアイコン
+│       │   ├── back.svg                # 戻るのアイコン
+│       │   ├── book.svg                # Project knowledgeのアイコン
+│       │   ├── close.svg               # 閉じるのアイコン
+│       │   ├── edit.svg                # 編集のアイコン
+│       │   ├── folder.svg              # Projectの詳細のアイコン
+│       │   ├── list.svg                # リスト表示のアイコン
+│       │   ├── minus.svg               # 縮小のアイコン
+│       │   ├── plus.svg                # 追加・拡大のアイコン
+│       │   ├── refresh.svg             # 再接続のアイコン
+│       │   ├── reset.svg               # 表示をリセットのアイコン
+│       │   ├── save.svg                # 保存のアイコン
+│       │   ├── settings.svg            # 設定のアイコン
+│       │   ├── status.svg              # status変更のアイコン
+│       │   ├── task.svg                # Task作成のアイコン
+│       │   ├── ticket.svg              # Ticket作成のアイコン
+│       │   ├── timeline.svg            # タイムライン表示のアイコン
+│       │   ├── trash.svg               # 論理削除のアイコン
+│       │   └── tree.svg                # キャンバス表示のアイコン
+│       ├── client.js                   # Coreへの接続・呼び出し
+│       ├── main.js                     # 画面・詳細・CRUD・テーマ連動
+│       ├── mod.json                    # Herdr Modの設定
+│       └── model.js                    # タイムライン・キャンバス・Job表示の計算
+├── scripts/                            # インストーラー
+│   ├── install.ps1                     # Windows用インストーラー
+│   └── install.sh                      # Linux・macOS用インストーラー
+├── skills/                             # LLM向け利用スキル
+│   └── herdr-ttj/                      # Herdr Modの利用スキル
+│       └── SKILL.md                    # LLM向けの導入・操作手順
+├── tests/                              # 自動テスト
+│   └── viewer.test.js                  # client・表示計算のテスト
+├── .gitignore                          # Gitの除外設定
+├── LICENSE                             # Apache-2.0ライセンス
+├── package.json                        # package情報・Node.jsのテストコマンド
+├── README.md                           # 概要・クイックスタート・フォルダ構造
+└── THIRD_PARTY_NOTICES.txt             # 同梱アイコンのライセンス・ブランド条件
