@@ -36,7 +36,7 @@ herdr-app do layout.switch --name ttj
 設定フォルダーは`HERDR_APP_HOME`、`XDG_CONFIG_HOME/herdr-app`、`$HOME/.config/herdr-app`の順で選びます。CoreをPATHへ追加する代わりに、PowerShellでは`-CorePath /path/to/ttjcore.exe`、shでは第1引数にCore実行ファイルを指定すると、Modのbinへ同梱できます。
 
 3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。
-4. 標準接続はCoreの初期化・起動・接続を自動で行います。Coreのinit・serve・プロファイルの知識は日常操作に必要ありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
+4. 標準接続はCoreの初期化・起動・接続を自動で行います。標準接続ではinit・serveを手動実行したり、profileを指定したりする必要はありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
 
 ## フォルダ構造
 
@@ -62,20 +62,20 @@ tests/        接続・履歴・配置・Job表示のテスト
 | 操作 | 表示・動作 |
 |---|---|
 | Projectタブ | CoreのProject名を表示。表示形式・リスト種別・キャンバス位置をProjectごとに保持 |
-| タイムライン | 実行・状態変更の履歴。行をクリックすると操作者・理由・変更内容 |
+| タイムライン | 実行・状態変更の履歴。行をクリックするとactor・reason・変更内容 |
 | キャンバス | Taskが先頭ノードとなり、Ticketの依存関係を矢印で表示 |
 | リスト | Task／Ticketを切り替え。行をクリックして詳細 |
-| カード／行 | タイトル・概要・状態を簡潔に表示。詳細は固定サイズのモーダルでスクロール |
-| Jobアイコン | 状態色の太いリング。クリックで手順・条件・結果・実行履歴 |
+| カード／行 | objective・summary・statusを簡潔に表示。詳細は固定サイズのモーダルでスクロール |
+| Jobアイコン | status色の太いリング。クリックでinstructions・criteria・result・Run |
 | nametag | ホバーでID、クリックでコピー |
-| 本のアイコン | 選択Projectのknowledge。Ticketの申し送りはTicket詳細 |
+| 本のアイコン | 選択Projectのknowledge。TicketのhandoffsはTicket詳細 |
 | 設定 | 操作者、接続、テーマ、アイコンキーとファイルの対応 |
 
 Task・Ticketカードは内容にかかわらず同じ幅・高さです。キャンバスは背景のドラッグ・ホイールで移動し、＋／−、Ctrlまたはプラットフォーム修飾キー付きホイール、ピンチで拡大縮小します。リセットで初期表示に戻ります。
 
-Jobは左詰めで最大8個です。8個を超える場合、作業中のJobと最大6個の前工程、次の1個を表示します。最後のJobが作業中なら7個です。作業中がなければ最初の非終端Job、全て終端なら最後を基準にします。Job詳細一覧には全件を上から実行順に表示します。
+Jobは左詰めで最大8個です。8個を超える場合、doingのJobと最大6個の前工程、次の1個を表示します。最後のJobがdoingなら7個です。doingがなければ最初のcompleted・canceled以外のJob、全てcompleted・canceledなら最後を基準にします。Job詳細一覧には全件を上から実行順に表示します。
 
-Taskの目標・完了条件・期限、Ticketの担当・依存・申し送り・再開条件・優先度を編集できます。Ticketの目標とJob計画は固定です。概要・JobアイコンキーはTTJ記録本体とは別の表示情報です。並行する変更と競合した場合は最新内容を読み直します。削除するには対象と配下の作業を完了または中止してください。削除後もCoreに履歴と依存参照が残ります。
+Taskのobjective・criteria・deadline、Ticketのassignee・depends・handoffs・resume・priorityを編集できます。TicketのobjectiveとJobの定義・順序は固定です。summary・JobのiconはTTJのrecord本体とは別のdisplayです。並行する変更と競合した場合は最新内容を読み直します。削除するには対象と配下をcompletedまたはcanceledにしてください。削除後もCoreに履歴と依存参照が残ります。
 
 ## 接続・テーマ・アイコン
 
@@ -108,13 +108,13 @@ HERDR_APP_HOME="$HOME/.config/herdr-ttj" sh scripts/install.sh
 HERDR_APP_HOME="$HOME/.config/herdr-ttj" herdr-app
 ```
 
-別ウインドウでも初回はttjレイアウトを選んでください。異なるHerdrアプリ設定フォルダー間では表示設定を共有しません。
+別ウインドウでも初回はttjレイアウトを選んでください。異なるHerdrアプリ設定フォルダー間では表示設定を共有しません。HERDR_APP_HOMEの変更はHerdrのSpace・terminalの隔離を意味しません。
 
-## LLMとの連携・開発
+## 開発
 
-LLMはCoreの`events.wait`で監視するか、`rpc`の`events.subscribe`で通知を受け取ります。UIから取得する必要はありません。実行エージェントが`run.start`・`run.finish`・`status.set`で状態を記録するとModへ反映されます。CoreはCodex・Claude Codeのプロセスを自動で検出・操作しません。
+Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/bf3efeffb76265910407c33b5489bcfb767a2d67/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。
 
-利用スキルは[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。テストはNode.js 24以降の標準ランナーを使い、npm installは不要です。Herdrのcheckは生成した型定義を使ってModを確認します。
+テストはNode.js 24以降の標準runnerを使い、npm installは不要です。Herdrのcheckは生成した型定義を使ってModを確認します。
 
 ```sh
 node --test
