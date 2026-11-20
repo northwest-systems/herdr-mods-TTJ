@@ -39,19 +39,29 @@
           "children": [
             {
               "id": "workspace-tabs",
-              "type": "block",
+              "type": "row",
               "size": {
                 "px": 36
               },
-              "content": {
-                "mod": "tabs"
-              }
+              "children": [
+                { "id": "workspace-tab-bar", "type": "block", "content": { "mod": "tabs" } },
+                { "id": "ttj-toggle", "type": "block", "size": { "px": 104 }, "content": { "mod": "ttj", "props": { "launcher": true, "panel": "ttj-panel" } } }
+              ]
             },
             {
               "id": "workspace-panes",
               "type": "block",
               "content": {
-                "tab": "active"
+                "tab": "active",
+                "pane": {
+                  "lone": true,
+                  "header": {
+                    "content": { "mod": "ttj", "props": { "screen": "pane-header" } },
+                    "height": 30,
+                    "position": "top",
+                    "reveal": "always"
+                  }
+                }
               }
             }
           ]
@@ -61,9 +71,11 @@
     {
       "id": "ttj-panel",
       "type": "block",
+      "hidden": true,
       "min": 160,
       "content": {
-        "mod": "ttj"
+        "mod": "ttj",
+        "props": { "panel": "ttj-panel" }
       },
       "size": {
         "px": 320

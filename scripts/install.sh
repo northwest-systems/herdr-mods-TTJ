@@ -3,7 +3,7 @@ set -eu
 source_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 herdr_app_home=${HERDR_APP_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}/herdr-app}
 mkdir -p "$herdr_app_home/mods/ttj" "$herdr_app_home/layouts"
-for entry in main.js model.js client.js mod.json icons assets; do
+for entry in main.js model.js placement.js client.js mod.json open-window.ps1 open-window.sh icons assets; do
     cp -R "$source_root/mods/ttj/$entry" "$herdr_app_home/mods/ttj/"
 done
 cp "$source_root"/layouts/ttj*.json "$herdr_app_home/layouts/"

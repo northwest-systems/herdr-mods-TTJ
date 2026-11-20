@@ -7,21 +7,21 @@
 
 ## 概要
 
-TTJCore 0.1.0を使い、Projectごとのタイムライン・TaskからTicketへ分岐するキャンバス・Task／Ticketリストを切り替えるHerdr Modです。バージョンは0.1.0です。Windows・Linux・macOSのHerdr 0.1.15以降を対象にします。
+TTJCore 0.1.1を使い、Projectごとのタイムライン・TaskからTicketへ分岐するキャンバス・Task／Ticketリストを切り替えるHerdr Modです。バージョンは0.1.1です。Windows・Linux・macOSのHerdr 0.1.15以降を対象にします。
 
-Project・Task・Ticketの作成・参照・編集・論理削除、状態変更、ProjectのKnowledge作成・参照に対応します。IDはCoreが自動発行します。Ticketは1つのTaskに所属し、Jobの構成・順序はTicket作成後に固定されます。
+Project・Task・Ticketの作成・参照・編集・削除、状態変更、ProjectのKnowledge作成・参照に対応します。終了したTaskは確認モーダルから配下を一括物理削除し、要約履歴とKnowledgeを残します。Project・Ticketの削除は論理削除です。IDはCoreが自動発行します。Ticketは1つのTaskに所属し、Jobの構成・順序はTicket作成後に固定されます。
 
 Coreが確定した変更を待ち受け、カード・一覧・開いている詳細に反映します。Coreとの通信はローカルIPCです。Webサーバーやブラウザー、npmの実行時依存パッケージは使用しません。
 
 ## クイックスタート
 
-1. [TTJCoreのクイックスタート](https://github.com/northwest-systems/TTJCore#クイックスタート)に従ってCore 0.1.0をインストールし、Herdrから`ttjcore`を起動できるPATHを用意します。インストール時にはRust・Cコンパイラーを使いますが、Modの利用時には不要です。
+1. [TTJCoreのクイックスタート](https://github.com/northwest-systems/TTJCore#クイックスタート)に従ってCore 0.1.1をインストールし、Herdrから`ttjcore`を起動できるPATHを用意します。インストール時にはRust・Cコンパイラーを使いますが、Modの利用時には不要です。
 2. Herdrをインストールし、次のコマンドでModを配置します。インストールスクリプトはこのリポジトリのModと3つのレイアウトをHerdrの設定フォルダーへコピーします。パッケージのダウンロードは行いません。同名のファイルは更新されます。
 
 ```sh
 git clone https://github.com/northwest-systems/herdr-mods-TTJ.git
 cd herdr-mods-TTJ
-git checkout v0.1.0
+git checkout v0.1.1
 ```
 
 PowerShell 7:
@@ -40,14 +40,16 @@ herdr-app do layout.switch --name ttj
 
 設定フォルダーは`HERDR_APP_HOME`、`XDG_CONFIG_HOME/herdr-app`、`$HOME/.config/herdr-app`の順で選びます。CoreをPATHへ追加する代わりに、PowerShellでは`-CorePath /path/to/ttjcore.exe`、shでは第1引数にCore実行ファイルを指定すると、Modのbinへ同梱できます。
 
-3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。
+3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。Taskの削除は理由不要で、確認モーダルを挟みます。
 4. 標準接続はCoreの初期化・起動・接続を自動で行います。標準接続ではinit・serveを手動実行したり、profileを指定したりする必要はありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
 
-キャンバス・リストは、ヘッダーのフィルターアイコンで「作業対象のみ」と全表示を切り替えられます。作業対象は未着手・作業中のTask／Ticketです。表示条件はProjectごとに保持します。
+キャンバス・リストは、ヘッダーのフィルターアイコンで進行対象への経路と全表示を切り替えられます。前提の中間点と未終了TicketのTaskを残し、終了・待機の末尾と末端がすべて保留のbranchを省略します。表示条件はProjectごとに保持します。
+
+横・下レイアウトはタブバーの単色アイコン＋TTJボタンで必要時だけ開閉します。隣の矢印から、右側・下側・paneの右／下分割・別OSウインドウを選べます。日時はJSTを既定とし、設定でUTC・端末の設定へ変更できます。状態色はフッターで確認でき、未着手はグレー、中止はピンク系です。
 
 ## 使い方ガイド
 
-[画像付き使い方ガイド](docs/usage-guide.md)で、横配置・下配置・別タブ・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
+[画像付き使い方ガイド](docs/usage-guide.md)で、表示先ボタン・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
 
 [App icon](docs/app-icon.md)は、ライト用・ダーク用・単色の黒・白を用意した512×512 pxの透過PNGです。
 
@@ -98,27 +100,40 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── arrowhead.svg           # キャンバスの矢じりのアイコン
 │       │   ├── back.svg                # 戻るのアイコン
 │       │   ├── book.svg                # Project Knowledgeのアイコン
+│       │   ├── bridge.svg              # 交差する依存線の半円
+│       │   ├── chevron-down.svg        # 表示先メニューの矢印
 │       │   ├── close.svg               # 閉じるのアイコン
 │       │   ├── edit.svg                # 編集のアイコン
+│       │   ├── execute.svg             # コマンド実行のアイコン
 │       │   ├── filter.svg              # 作業対象の表示切替アイコン
 │       │   ├── folder.svg              # Projectの詳細のアイコン
 │       │   ├── list.svg                # リスト表示のアイコン
 │       │   ├── minus.svg               # 縮小のアイコン
+│       │   ├── pane-down.svg           # paneの下分割
+│       │   ├── pane-right.svg          # paneの右分割
+│       │   ├── panel-bottom.svg        # 下側への表示
+│       │   ├── panel-right.svg         # 右側への表示
 │       │   ├── plus.svg                # 追加・拡大のアイコン
 │       │   ├── refresh.svg             # 再接続のアイコン
 │       │   ├── reset.svg               # 表示をリセットのアイコン
+│       │   ├── review.svg              # レビューのアイコン
 │       │   ├── save.svg                # 保存のアイコン
+│       │   ├── search.svg              # 調査のアイコン
 │       │   ├── settings.svg            # 設定のアイコン
 │       │   ├── status.svg              # status変更のアイコン
 │       │   ├── task.svg                # Task作成のアイコン
 │       │   ├── ticket.svg              # Ticket作成のアイコン
 │       │   ├── timeline.svg            # タイムライン表示のアイコン
 │       │   ├── trash.svg               # 論理削除のアイコン
-│       │   └── tree.svg                # キャンバス表示のアイコン
+│       │   ├── tree.svg                # キャンバス表示のアイコン
+│       │   └── window.svg              # 別OSウインドウの表示
 │       ├── client.js                   # Coreへの接続・呼び出し
 │       ├── main.js                     # 画面・詳細・CRUD・テーマ連動
 │       ├── mod.json                    # Herdr Modの設定
-│       └── model.js                    # タイムライン・キャンバス・Job表示の計算
+│       ├── model.js                    # タイムライン・キャンバス・Job表示の計算
+│       ├── open-window.ps1             # Windowsの別OSウインドウ起動
+│       ├── open-window.sh              # Linux・macOSの別OSウインドウ起動
+│       └── placement.js                # 表示先の切り替え
 ├── scripts/                            # インストーラー
 │   ├── install.ps1                     # Windows用インストーラー
 │   └── install.sh                      # Linux・macOS用インストーラー
@@ -126,6 +141,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │   └── herdr-ttj/                      # Herdr Modの利用スキル
 │       └── SKILL.md                    # LLM向けの導入・操作手順
 ├── tests/                              # 自動テスト
+│   ├── placement.test.js               # 表示先・起動引数のテスト
 │   └── viewer.test.js                  # client・表示計算のテスト
 ├── .gitignore                          # Gitの除外設定
 ├── LICENSE                             # Apache-2.0ライセンス
@@ -136,7 +152,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 
 ## 開発
 
-Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/fa6da9588148c2c70590b17eacd93945165a420a/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。
+Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/495ffe3f3f601fd1df88398d09beff75f05cf82d/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。Taskの削除には`task.purge`に対応するCoreが必要です。
 
 テストはNode.js 24以降の標準runnerを使い、npm installは不要です。Herdrのcheckは生成した型定義を使ってModを確認します。
 

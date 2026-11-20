@@ -22,7 +22,7 @@ export function createClient(exec, config = {}) {
   return async (method, params = {}) => {
     await ensure();
     let result;
-    try { result = await exec(command, [...prefix, "call", method, "--params", JSON.stringify(params)], { timeout: method === "events.wait" ? 30000 : 15000 }); }
+    try { result = await exec(command, [...prefix, "call", method, "--params", JSON.stringify(params)], { timeout: method === "task.purge" ? 600000 : method === "events.wait" ? 30000 : 15000 }); }
     catch { starting = null; throw new Error("TTJCoreを起動できません。接続設定を確認してください。"); }
     let response;
     try { response = JSON.parse(result.stdout); }
@@ -30,7 +30,11 @@ export function createClient(exec, config = {}) {
     if (response.jsonrpc !== "2.0" || response.protocol !== PROTOCOL || response.id !== 1) {
       throw new Error("TTJCoreのプロトコルまたは応答IDが一致しません。");
     }
-    if (response.error) throw new Error(response.error.message || "TTJCoreの処理に失敗しました。");
+    if (response.error) {
+      const error=new Error(response.error.message || "TTJCoreの処理に失敗しました。");
+      error.code=response.error.code;
+      throw error;
+    }
     if (result.code !== 0 || !Object.hasOwn(response, "result")) throw new Error("TTJCoreの処理が完了しませんでした。");
     return response.result;
   };
