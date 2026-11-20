@@ -3,9 +3,18 @@ $ErrorActionPreference = 'Stop'
 $windowHome = Join-Path $AppHome 'ttj-window'
 $modTarget = Join-Path $windowHome 'mods/ttj'
 New-Item -ItemType Directory -Force -Path $modTarget, (Join-Path $windowHome 'layouts') | Out-Null
-foreach ($entry in @('main.js', 'model.js', 'placement.js', 'client.js', 'mod.json', 'open-window.ps1', 'open-window.sh', 'icons', 'assets', 'bin', 'THIRD_PARTY_NOTICES.txt')) {
+foreach ($entry in @('main.js', 'model.js', 'placement.js', 'client.js', 'mod.json', 'open-window.ps1', 'open-window.sh', 'icons', 'assets', 'THIRD_PARTY_NOTICES.txt')) {
     $source = Join-Path $PSScriptRoot $entry
     if (Test-Path -LiteralPath $source) { Copy-Item -LiteralPath $source -Destination $modTarget -Recurse -Force }
+}
+$coreSource = Join-Path $PSScriptRoot 'bin/ttjcore.exe'
+if (Test-Path -LiteralPath $coreSource) {
+    $binTarget = Join-Path $modTarget 'bin'
+    New-Item -ItemType Directory -Force -Path $binTarget | Out-Null
+    $coreTarget = Join-Path $binTarget 'ttjcore.exe'
+    if (-not (Test-Path -LiteralPath $coreTarget) -or (Get-FileHash $coreSource).Hash -ne (Get-FileHash $coreTarget).Hash) {
+        Copy-Item -LiteralPath $coreSource -Destination $coreTarget -Force
+    }
 }
 Get-ChildItem -LiteralPath (Join-Path $AppHome 'layouts') -Filter 'ttj*.json' |
     Copy-Item -Destination (Join-Path $windowHome 'layouts') -Force
