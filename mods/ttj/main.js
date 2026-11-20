@@ -5,7 +5,7 @@ const { exec, theme, props:modProps, appHome, openOverlay, closeOverlay, shared,
 import { platform } from "process";
 import { exists } from "fs/promises";
 import { createClient } from "./client.js";
-import { STATUS, tickets, timeline, entityMap, dependencyTickets, formatTimestamp, TIME_ZONES, ticketCanvas, visibleJobs, visibleWork, jobIcon, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
+import { STATUS, tickets, timeline, entityMap, dependencyTickets, formatTimestamp, TIME_ZONES, ticketCanvas, visibleJobs, visibleWork, canPurgeTask, jobIcon, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
 import { PLACEMENTS, findPanel, showPlacement } from "./placement.js";
 
 const KIND_NAMES={project:"Project",task:"Task",ticket:"Ticket",job:"Job",run:"Run",knowledge:"Knowledge"};
@@ -223,15 +223,26 @@ export default class TTJ extends View {
       .when(Boolean(this.error),el=>el.child(div().p(8).text_size(11).text_color(t.ansi1).child(this.error)));
   }
   copy(id,t) {return this.button("copy-"+id,"id.copy",id+" · クリックでコピー",cx=>cx.write_to_clipboard(id),t);}
-  row(id,title,status,action,t,key=null) {
+  taskDelete(entry,t,z=1) {
+    const allowed=canPurgeTask(this.snapshot,entry);
+    return Button.new("task-delete-"+entry.record.id).w(20*z).h(20*z).p(0).rounded(0).bg(t.surface).disabled(!allowed)
+      .tooltip(allowed ? "Taskを削除" : "Taskと配下を完了または中止にしてから削除できます")
+      .accessibility_label("Taskを削除: "+entry.record.objective)
+      .when(allowed,el=>el.cursor_pointer().hover(s=>s.bg(t.hover)))
+      .on_mouse_down("left",(_event,cx)=>cx.stop_propagation())
+      .on_click((_event,cx)=>{cx.stop_propagation();if (allowed) this.overlay("delete","task",entry);})
+      .child(this.glyph("trash",{...t,foreground:allowed ? t.ansi1 : t.muted},12*z));
+  }
+  row(id,title,status,action,t,key=null,trailing=null) {
     return h_flex().id(id).w_full().h(38).flex_none().px(10).gap(8).items_center().bg(t.surface)
       .cursor_pointer().hover(s=>s.bg(t.hover)).on_click((_event,cx)=>action(cx))
       .when(Boolean(key),el=>el.child(this.glyph(key,t)))
       .child(div().flex_1().min_w(0).truncate().text_size(12).child(title))
-      .when(Boolean(status),el=>el.child(this.badge(status,t)));
+      .when(Boolean(status),el=>el.child(this.badge(status,t)))
+      .when(Boolean(trailing),el=>el.child(trailing));
   }
   overlay(screen,kind,entry=null) {
-    openOverlay({mod:"ttj",kind:"dialog",frame:"none",modal:true,width:600,height:520,
+    openOverlay({mod:"ttj",kind:"dialog",frame:"none",modal:true,width:600,height:screen==="delete" && kind==="task" ? 300 : 520,
       props:{...this.config,screen,kind,entry,project:this.project,snapshot:this.snapshot,
         detail:screen==="detail" ? {kind,id:entry.record.id} : undefined}});
   }
@@ -287,10 +298,12 @@ export default class TTJ extends View {
         .child(h_flex().w_full().h(20*z).items_center().justify_between()
           .child(h_flex().w(54*z).h(18*z).items_center().justify_center().bg(t.raised).text_size(9*z)
             .text_color(this.statusColor(record.status,t)).child(STATUS[record.status] ?? ""))
+          .child(h_flex().gap(4*z).items_center()
+          .when(task,el=>el.child(this.taskDelete(node.entry,t,z)))
           .child(Button.new("node-copy-"+record.id).w(20*z).h(20*z).p(0).rounded(0).bg(t.surface)
             .tooltip(record.id+" · コピー").on_mouse_down("left",(_event,cx)=>cx.stop_propagation())
             .on_click((_event,cx)=>{cx.stop_propagation();cx.write_to_clipboard(record.id);})
-            .child(this.glyph("id.copy",t,12*z))))
+            .child(this.glyph("id.copy",t,12*z)))))
         .child(div().w_full().h(16*z).text_size(12*z).font_semibold().truncate().child((task ? "Task · " : "")+record.objective))
         .child(div().w_full().h(13*z).text_size(9*z).text_color(t.muted).truncate().child(node.entry.display?.summary ?? ""))
         .when(!task,el=>el.child(h_flex().w_full().h(20*z).gap(2*z).items_center()
@@ -322,7 +335,7 @@ export default class TTJ extends View {
     const entries=task ? (this.snapshot?.tasks ?? []).map(item=>item.task) : tickets(this.snapshot).map(item=>item.ticket);
     const visible=visibleWork(this.snapshot,this.state());
     return this.scroll("ttj-list",entries.filter(entry=>visible.has(entry.record.id)).map(entry=>this.row("list-"+entry.record.id,entry.record.objective,entry.record.status,
-      cx=>this.openRecord(kind,entry.record.id,cx),t)),t,"表示条件に一致するTask・Ticketはありません。");
+      cx=>this.openRecord(kind,entry.record.id,cx),t,null,task ? this.taskDelete(entry,t) : null)),t,"表示条件に一致するTask・Ticketはありません。");
   }
   events(t) {
     return this.scroll("ttj-events",timeline(this.snapshot,settings().timeZone).map(event=>
@@ -395,7 +408,8 @@ export default class TTJ extends View {
       if (["task","ticket","job"].includes(entry?.kind) && !TERMINAL.has(record.status))
         actions.push(this.button("detail-status","status","状態変更",cx=>this.buildForm("status",entry.kind,entry.entry,cx),t));
       if (["project","task","ticket"].includes(entry?.kind))
-        actions.push(this.button("detail-delete","trash","論理削除",cx=>this.buildForm("delete",entry.kind,entry.entry,cx),t));
+        actions.push(this.button("detail-delete","trash",entry.kind==="task" ? "Taskを削除" : "論理削除",cx=>entry.kind==="task" ? this.overlay("delete","task",entry.entry) : this.buildForm("delete",entry.kind,entry.entry,cx),t,false,
+          entry.kind==="task" && !canPurgeTask(this.snapshot,entry.entry)));
     }
     return this.modal(record?.objective ?? record?.name ?? event?.title ?? KIND_NAMES[entry?.kind] ?? "詳細",record?.status,
       this.scroll("detail-fields",fields,t,"この項目は削除されたか、現在のProjectにありません。"),actions,t);
@@ -415,7 +429,7 @@ export default class TTJ extends View {
     if (screen==="settings") {
       add("operator",p.operator ?? "operator");add("command",p.command ?? "ttjcore");add("args",JSON.stringify(p.args ?? []));
       add("profile",p.profile ?? "");add("icons",JSON.stringify(p.icons ?? {},null,2),true);
-    } else if (screen==="delete") add("reason","");
+    } else if (screen==="delete") {if (kind!=="task") add("reason","");}
     else if (screen==="status") {add("reason","");add("result","",true);}
     else {
       if (kind==="project") add("name",record.name);
@@ -457,7 +471,9 @@ export default class TTJ extends View {
       } catch(error) {this.error=error.message;cx.notify();}
       return;
     }
-    if (!v.reason) {this.error="変更理由を入力してください。";cx.notify();return;}
+    const taskPurge=screen==="delete" && form.kind==="task";
+    if (!taskPurge && !v.reason) {this.error="変更理由を入力してください。";cx.notify();return;}
+    if (taskPurge && !canPurgeTask(this.snapshot,form.entry)) {this.error="Taskと配下を完了または中止にしてから削除してください。";cx.notify();return;}
     if (!this.client) {this.error="Coreへの接続を準備中です。";cx.notify();return;}
     this.busy=true;this.error="";cx.notify();
     cx.spawn(async cx=>{
@@ -465,11 +481,12 @@ export default class TTJ extends View {
         const actor=[settings().operator || "operator"];
         // Keep the exact operation and request for a retry after a lost response.
         if (!form.request) {
-          const p={actor,reason:v.reason,operation:"ui-"+Date.now()+"-"+Math.random().toString(36).slice(2)};
+          const p={actor,operation:"ui-"+Date.now()+"-"+Math.random().toString(36).slice(2)};
+          if (!taskPurge) p.reason=v.reason;
           let method;
           if (screen==="delete" || screen==="status") {
             Object.assign(p,{id:form.entry.record.id,revision:form.entry.revision});
-            method=screen==="delete" ? form.kind+".delete" : "status.set";
+            method=screen==="delete" ? (taskPurge ? "task.purge" : form.kind+".delete") : "status.set";
             if (screen==="status") Object.assign(p,{status:form.status,result:v.result,release:form.release,resolved:form.resolved,criteria_met:form.criteria_met});
           } else {
             const record={};method=form.kind+"."+(screen==="create" ? "create" : "update");
@@ -503,9 +520,10 @@ export default class TTJ extends View {
           }
           form.request={method,params:p};
         }
-        await this.client(form.request.method,form.request.params);
+        const result=await this.client(form.request.method,form.request.params);
+        if (taskPurge && result.value?.storage==="pending") notify({title:"Taskを削除しました",body:"データの削除は完了しましたが、容量回収は未完了です。",level:"warning"});
         closeOverlay(this.config.overlay);
-      } catch(error) {this.error=error.message;}
+      } catch(error) {this.error=taskPurge && error.code===-32601 ? "この削除操作に対応するTTJCoreへ更新してください。" : error.message;}
       finally {this.busy=false;cx.notify();}
     });
   }
@@ -525,7 +543,10 @@ export default class TTJ extends View {
       rows.push(choices("日時の表示タイムゾーン","timeZone",Object.entries(TIME_ZONES),156));
       rows.push(this.text("標準接続はCoreを自動で準備します。カスタム接続は指定した実行ファイルとプロファイルを使います。",t));
     }
-    if (screen==="delete") rows.push(this.section("論理削除",this.text("配下を含む作業を完了または中止してから削除してください。履歴と依存参照は保持されます。",t),t));
+    const taskPurge=screen==="delete" && f.kind==="task";
+    if (screen==="delete") rows.push(this.section(taskPurge ? "削除の確認" : "論理削除",this.text(taskPurge
+      ? "このTaskと配下のすべてのTicket・Job・Runを削除します。元には戻せません。要約履歴とProjectのKnowledgeは残ります。他Taskから参照中の場合は削除できません。"
+      : "配下を含む作業を完了または中止してから削除してください。履歴と依存参照は保持されます。",t),t));
     if (screen==="status") {
       rows.push(choices("状態","status",Object.entries(STATUS).filter(([id])=>JOB_COLORS[id])));
       for (const [key,label] of [["release","保留を解除"],["resolved","待機・障害の原因を解消済み"],["criteria_met","完了条件を満たした（結果の記入が必要）"]])
@@ -559,8 +580,12 @@ export default class TTJ extends View {
     }
     if (f.kind==="ticket" && screen==="create") rows.push(this.button("add-job","plus","Jobを追加",cx=>this.addJob(cx),t));
     if (this.detailRef) actions.push(this.button("form-back","back","詳細に戻る",cx=>{this.screen="detail";this.releaseInputs();cx.notify();},t));
-    actions.push(this.button("form-save",screen==="delete" ? "trash" : "save",screen==="delete" ? "論理削除を確定" : "保存",cx=>this.submit(cx),t,false,this.busy || Boolean(stale)));
-    const title=screen==="settings" ? "設定" : (KIND_NAMES[f.kind] ?? "")+" · "+({create:"作成",edit:"編集",delete:"論理削除",status:"状態変更"}[screen] ?? "");
+    if (taskPurge) {
+      actions.push(this.tab("delete-cancel","キャンセル",()=>closeOverlay(this.config.overlay),t,false,96).disabled(this.busy));
+      actions.push(this.tab("delete-confirm","削除する",cx=>this.submit(cx),t,false,96).text_color(t.ansi1)
+        .disabled(this.busy || Boolean(stale) || !canPurgeTask(this.snapshot,f.entry)));
+    } else actions.push(this.button("form-save",screen==="delete" ? "trash" : "save",screen==="delete" ? "論理削除を確定" : "保存",cx=>this.submit(cx),t,false,this.busy || Boolean(stale)));
+    const title=screen==="settings" ? "設定" : (KIND_NAMES[f.kind] ?? "")+" · "+(taskPurge ? "削除" : {create:"作成",edit:"編集",delete:"論理削除",status:"状態変更"}[screen] ?? "");
     return this.modal(title,f.entry?.record.status,this.scroll("form-fields",rows,t),actions,t);
   }
   knowledge(t) {

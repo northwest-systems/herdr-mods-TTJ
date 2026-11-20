@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { createClient, PROTOCOL } from "../mods/ttj/client.js";
-import { timeline, dependencyTickets, formatTimestamp, ticketCanvas, edgeBridges, visibleJobs, visibleWork, jobIcon, DEFAULT_ICONS } from "../mods/ttj/model.js";
+import { timeline, dependencyTickets, formatTimestamp, ticketCanvas, edgeBridges, visibleJobs, visibleWork, canPurgeTask, jobIcon, DEFAULT_ICONS } from "../mods/ttj/model.js";
 test("ships a valid asset for every standard Job icon",async()=>{
  for (const key of ["job","search","edit","execute","test","review","book"]) {
    assert.ok(DEFAULT_ICONS[key]);
@@ -271,4 +271,26 @@ test("retains cross-Task prerequisites and paused intermediate nodes leading to 
  snapshot.tasks[0].tickets[0].ticket.record.status="paused";
  assert.deepEqual(visibleWork(snapshot,{workOnly:true}),new Set(["paused","first","next","second"]));
  assert.deepEqual(visibleWork(null,{workOnly:true}),new Set());
+});
+
+test("enables Task deletion only when the Task and every descendant are terminal",()=>{
+ const task={record:{id:"task",status:"doing"}},ticket={record:{id:"ticket",status:"completed"}},job={record:{id:"job",status:"completed"}};
+ const snapshot={tasks:[{task,tickets:[{ticket,jobs:[job]}]}]};
+ assert.equal(canPurgeTask(snapshot,task),false);
+ for(const status of ["completed","canceled"]) {
+   task.record.status=status;assert.equal(canPurgeTask(snapshot,task),true);
+   job.record.status="todo";assert.equal(canPurgeTask(snapshot,task),false);job.record.status="completed";
+   ticket.record.status="waiting";assert.equal(canPurgeTask(snapshot,task),false);ticket.record.status="completed";
+   job.active=true;assert.equal(canPurgeTask(snapshot,task),false);job.active=false;
+ }
+ assert.equal(canPurgeTask(null,task),false);
+ assert.equal(canPurgeTask(snapshot,null),false);
+});
+test("keeps RPC error codes for unsupported purge and allows time for capacity recovery",async()=>{
+ let options;
+ const client=createClient(async(_command,_args,current)=>{
+   options=current;return {code:2,stdout:JSON.stringify({jsonrpc:"2.0",protocol:PROTOCOL,id:1,error:{code:-32601,message:"Method not found"}})};
+ },{autoStart:false});
+ await assert.rejects(client("task.purge",{id:"example-task"}),error=>error.code===-32601);
+ assert.equal(options.timeout,600000);
 });

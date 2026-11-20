@@ -9,7 +9,7 @@
 
 TTJCore 0.1.1を使い、Projectごとのタイムライン・TaskからTicketへ分岐するキャンバス・Task／Ticketリストを切り替えるHerdr Modです。バージョンは0.1.1です。Windows・Linux・macOSのHerdr 0.1.15以降を対象にします。
 
-Project・Task・Ticketの作成・参照・編集・論理削除、状態変更、ProjectのKnowledge作成・参照に対応します。IDはCoreが自動発行します。Ticketは1つのTaskに所属し、Jobの構成・順序はTicket作成後に固定されます。
+Project・Task・Ticketの作成・参照・編集・削除、状態変更、ProjectのKnowledge作成・参照に対応します。終了したTaskは確認モーダルから配下を一括物理削除し、要約履歴とKnowledgeを残します。Project・Ticketの削除は論理削除です。IDはCoreが自動発行します。Ticketは1つのTaskに所属し、Jobの構成・順序はTicket作成後に固定されます。
 
 Coreが確定した変更を待ち受け、カード・一覧・開いている詳細に反映します。Coreとの通信はローカルIPCです。Webサーバーやブラウザー、npmの実行時依存パッケージは使用しません。
 
@@ -40,7 +40,7 @@ herdr-app do layout.switch --name ttj
 
 設定フォルダーは`HERDR_APP_HOME`、`XDG_CONFIG_HOME/herdr-app`、`$HOME/.config/herdr-app`の順で選びます。CoreをPATHへ追加する代わりに、PowerShellでは`-CorePath /path/to/ttjcore.exe`、shでは第1引数にCore実行ファイルを指定すると、Modのbinへ同梱できます。
 
-3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。
+3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。Taskの削除は理由不要で、確認モーダルを挟みます。
 4. 標準接続はCoreの初期化・起動・接続を自動で行います。標準接続ではinit・serveを手動実行したり、profileを指定したりする必要はありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
 
 キャンバス・リストは、ヘッダーのフィルターアイコンで進行対象への経路と全表示を切り替えられます。前提の中間点と未終了TicketのTaskを残し、終了・待機の末尾と末端がすべて保留のbranchを省略します。表示条件はProjectごとに保持します。
@@ -152,7 +152,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 
 ## 開発
 
-Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/4faa55db43da2751971863b807bdf516dc6e2bac/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。
+Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/b43abe9bc699345b966904f25b50c9c101209f5b/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。Taskの削除には`task.purge`に対応するCoreが必要です。
 
 テストはNode.js 24以降の標準runnerを使い、npm installは不要です。Herdrのcheckは生成した型定義を使ってModを確認します。
 

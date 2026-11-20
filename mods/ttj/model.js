@@ -139,6 +139,13 @@ export function visibleWork(snapshot, {workOnly=false}={}) {
   return visible;
 }
 
+export function canPurgeTask(snapshot, entry) {
+  const ended=wrapper=>["completed","canceled"].includes(wrapper?.record?.status) && !wrapper.active;
+  if (!ended(entry)) return false;
+  const task=snapshot?.tasks?.find(item=>item.task.record.id===entry.record.id);
+  return Boolean(task) && task.tickets.every(item=>ended(item.ticket) && item.jobs.every(ended));
+}
+
 export function edgeBridges(edges) {
   const bridges=new Map(),horizontal=[],vertical=[];
   for (const edge of edges) for (let index=1;index<edge.points.length;index++) {

@@ -162,12 +162,16 @@ nametagはhoverでID、クリックでコピーします。ProjectのKnowledge�
 
 ## 作成・編集・削除
 
-編集・statusの変更・削除は詳細の右上です。変更にはreasonを入力します。
+編集・statusの変更・削除は詳細の右上です。TaskはカードとTask一覧にも削除ボタンがあります。Task削除以外の変更にはreasonを入力します。
 
 - Taskはobjective・criteria・deadlineを編集できます。
 - Ticketはassignee・depends・handoffs・resume・priorityを編集できます。objectiveとJobの定義・順序は作成後に固定されます。
 - summary・JobのiconはTTJのrecord本体とは別のdisplayです。
-- 削除はcompletedまたはcanceledになった対象と配下に行う論理削除です。履歴・ID・dependsの参照はCoreに残ります。
+- Taskの削除は、Task自身と配下がcompletedまたはcanceledになった場合だけ選べます。確認モーダルで対象名と削除範囲を確認し、「削除する」で確定します。理由入力は不要で、「キャンセル」では削除しません。
+- Taskと配下の全Ticket・Job・Runを物理削除し、詳しい履歴と再送データを整理します。要約履歴とProjectのKnowledgeは残ります。必要な詳しい内容は、日々の作業でKnowledgeへ記録します。
+- 他TaskのTicketから参照されているTaskは削除できません。完了したTaskを閲覧したい場合は、削除せず全表示に切り替えて確認します。
+- SQLiteは削除後に容量回収を試みます。回収未完了の通知が出てもデータの削除は完了しています。PostgreSQLは削除領域をDB側で再利用します。
+- Project・Ticketの削除は、対象と配下の作業がcompletedまたはcanceledになった後に行う論理削除です。履歴・ID・dependsの参照はCoreに残ります。
 
 並行する変更とconflictした場合は、最新の内容を読み直してください。
 
