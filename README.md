@@ -43,7 +43,9 @@ herdr-app do layout.switch --name ttj
 3. 右上の＋でProjectを作り、Projectを選択します。ツールバーのTask作成・Ticket作成アイコンから計画を登録します。操作者は設定画面で変更できます。変更操作には理由を入力します。
 4. 標準接続はCoreの初期化・起動・接続を自動で行います。標準接続ではinit・serveを手動実行したり、profileを指定したりする必要はありません。接続できない場合は設定アイコンから実行ファイルや接続先を確認します。
 
-キャンバス・リストは、ヘッダーのフィルターアイコンで「作業対象のみ」と全表示を切り替えられます。作業対象は未着手・作業中のTask／Ticketです。表示条件はProjectごとに保持します。
+キャンバス・リストは、ヘッダーのフィルターアイコンで進行対象への経路と全表示を切り替えられます。前提の中間点と未終了TicketのTaskを残し、終了・待機の末尾と末端がすべて保留のbranchを省略します。表示条件はProjectごとに保持します。
+
+横・下レイアウトはタブバーのTTJボタンで必要時だけ開閉します。日時はJSTを既定とし、設定でUTC・端末の設定へ変更できます。状態色はフッターで確認できます。
 
 ## 使い方ガイド
 
@@ -98,8 +100,10 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── arrowhead.svg           # キャンバスの矢じりのアイコン
 │       │   ├── back.svg                # 戻るのアイコン
 │       │   ├── book.svg                # Project Knowledgeのアイコン
+│       │   ├── bridge.svg              # 交差する依存線の半円
 │       │   ├── close.svg               # 閉じるのアイコン
 │       │   ├── edit.svg                # 編集のアイコン
+│       │   ├── execute.svg             # コマンド実行のアイコン
 │       │   ├── filter.svg              # 作業対象の表示切替アイコン
 │       │   ├── folder.svg              # Projectの詳細のアイコン
 │       │   ├── list.svg                # リスト表示のアイコン
@@ -107,7 +111,9 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── plus.svg                # 追加・拡大のアイコン
 │       │   ├── refresh.svg             # 再接続のアイコン
 │       │   ├── reset.svg               # 表示をリセットのアイコン
+│       │   ├── review.svg              # レビューのアイコン
 │       │   ├── save.svg                # 保存のアイコン
+│       │   ├── search.svg              # 調査のアイコン
 │       │   ├── settings.svg            # 設定のアイコン
 │       │   ├── status.svg              # status変更のアイコン
 │       │   ├── task.svg                # Task作成のアイコン
