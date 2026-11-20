@@ -2,6 +2,7 @@ export const STATUS = {
   todo:"未着手", doing:"作業中", waiting:"待機", paused:"保留",
   blocked:"障害", completed:"完了", canceled:"中止", active:"採用中", supersed:"過去",
 };
+export const KIND_NAMES={project:"Project",task:"Task",ticket:"Ticket",job:"Job",run:"Run",knowledge:"Knowledge"};
 const EVENTS = {
   "record.created":"作成", "record.updated":"更新", "record.deleted":"削除",
   "status.changed":"状態変更", "run.started":"実行開始", "run.finished":"実行終了",
@@ -73,7 +74,13 @@ export function timeline(snapshot, timeZone="JST") {
   }).map(event=>{
     const before=event.from?.record,after=event.to?.record;
     const from=before?.status,to=after?.status;
+    const record=after ?? before;
+    const inferred=record?.job || ["run.started","run.finished","execution.stop_requested"].includes(event.event) ? "run"
+      : record?.task ? "ticket" : record?.project && record?.criteria ? "task"
+      : record?.content ? "knowledge" : record?.name ? "project" : record?.criteria ? "job" : null;
+    const kind=[event.kind,event.to?.kind,event.from?.kind,map.get(event.target)?.kind,inferred].find(kind=>Object.hasOwn(KIND_NAMES,kind));
     return {...event,
+      kind,kindLabel:KIND_NAMES[kind] ?? "履歴",
       title:after?.objective ?? after?.name ?? after?.content
         ?? before?.objective ?? before?.name ?? before?.content
         ?? map.get(after?.job ?? before?.job ?? event.target)?.entry.record.objective ?? "対象を確認できません",

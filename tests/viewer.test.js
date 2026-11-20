@@ -294,3 +294,20 @@ test("keeps RPC error codes for unsupported purge and allows time for capacity r
  await assert.rejects(client("task.purge",{id:"example-task"}),error=>error.code===-32601);
  assert.equal(options.timeout,600000);
 });
+test("labels all timeline target kinds even when their titles are identical",()=>{
+ const kinds=["project","task","ticket","job","run","knowledge"];
+ const snapshot={timeline:kinds.map((kind,index)=>({id:index,kind,target:"removed-"+index,event:"record.deleted",to:{kind,summary:true,record:{objective:"同じ目標"}}}))};
+ const rows=timeline(snapshot);
+ assert.deepEqual(rows.map(row=>row.kind),[...kinds].reverse());
+ assert.deepEqual(rows.map(row=>row.kindLabel),["Knowledge","Run","Job","Ticket","Task","Project"]);
+ assert.ok(rows.every(row=>row.title==="同じ目標"));
+});
+test("resolves kinds in older history from current records and Run or Knowledge fields",()=>{
+ const snapshot={tasks:[{task:{record:{id:"task",objective:"Task"}},tickets:[{ticket:{record:{id:"ticket",objective:"Ticket"}},jobs:[{record:{id:"job",objective:"Job"}}]}]}],timeline:[
+   {id:1,target:"task",event:"record.updated"}, {id:2,target:"ticket",event:"record.updated"},
+   {id:3,target:"job",event:"record.updated"}, {id:4,target:"run",event:"run.started",to:{record:{job:"job"}}},
+   {id:5,target:"knowledge",event:"record.created",to:{record:{content:"Knowledge"}}},
+   {id:6,target:"project",event:"record.created",to:{record:{name:"Project"}}},
+ ]};
+ assert.deepEqual(timeline(snapshot).map(row=>row.kindLabel),["Project","Knowledge","Run","Job","Ticket","Task"]);
+});

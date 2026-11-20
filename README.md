@@ -152,7 +152,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 
 ## 開発
 
-Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/b43abe9bc699345b966904f25b50c9c101209f5b/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。Taskの削除には`task.purge`に対応するCoreが必要です。
+Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/495ffe3f3f601fd1df88398d09beff75f05cf82d/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。Taskの削除には`task.purge`に対応するCoreが必要です。
 
 テストはNode.js 24以降の標準runnerを使い、npm installは不要です。Herdrのcheckは生成した型定義を使ってModを確認します。
 

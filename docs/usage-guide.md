@@ -136,7 +136,7 @@ herdr-app do layout.switch --name ttj
 
 | 表示 | 用途 |
 |---|---|
-| timeline | Run・status変更の履歴。行をクリックするとactor・reasonなどの詳細 |
+| timeline | 各行にProject・Task・Ticket・Job・Run・Knowledgeの種別と変更内容を表示。クリックすると対象種別・actor・時刻などの詳細 |
 | canvas | Taskを先頭にTicketとdependsを表示。背景のdrag・wheelで移動 |
 | list | Task／Ticketを切り替え、行をクリックして詳細 |
 

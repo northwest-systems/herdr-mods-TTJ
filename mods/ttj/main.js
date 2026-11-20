@@ -5,10 +5,9 @@ const { exec, theme, props:modProps, appHome, openOverlay, closeOverlay, shared,
 import { platform } from "process";
 import { exists } from "fs/promises";
 import { createClient } from "./client.js";
-import { STATUS, tickets, timeline, entityMap, dependencyTickets, formatTimestamp, TIME_ZONES, ticketCanvas, visibleJobs, visibleWork, canPurgeTask, jobIcon, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
+import { STATUS, KIND_NAMES, tickets, timeline, entityMap, dependencyTickets, formatTimestamp, TIME_ZONES, ticketCanvas, visibleJobs, visibleWork, canPurgeTask, jobIcon, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
 import { PLACEMENTS, findPanel, showPlacement } from "./placement.js";
 
-const KIND_NAMES={project:"Project",task:"Task",ticket:"Ticket",job:"Job",run:"Run",knowledge:"Knowledge"};
 const VIEWS=[["timeline","タイムライン"],["tree","キャンバス"],["list","リスト"]];
 const LABELS={name:"名前",objective:"目標",summary:"概要",criteria:"完了条件（1行に1つ）",deadline:"期限（タイムゾーン付き日時）",
   instructions:"手順",assignee:"担当（1行に1人）",handoffs:"申し送り（1行に1件）",resume:"再開条件",priority:"優先度",
@@ -342,7 +341,9 @@ export default class TTJ extends View {
       h_flex().id("event-"+event.id).w_full().h(42).flex_none().px(10).gap(8).items_center().bg(t.surface)
         .cursor_pointer().hover(s=>s.bg(t.hover)).on_click((_event,cx)=>this.openRecord("event",event.id,cx))
         .child(v_flex().flex_1().min_w(0).gap(2)
-          .child(div().text_size(12).truncate().child(event.title))
+          .child(h_flex().w_full().min_w(0).gap(6).items_center()
+            .child(this.badge(event.kindLabel,t))
+            .child(div().flex_1().min_w(0).text_size(12).truncate().child(event.title)))
           .child(div().text_size(9).text_color(t.muted).child(event.timeLabel)))
         .child(h_flex().w(64).h(20).items_center().justify_center().text_size(10).text_color(t.muted).child(event.label))
         .child(this.badge(event.to?.record?.status,t))),t,"実行・状態変更の履歴はまだありません。");
@@ -411,7 +412,8 @@ export default class TTJ extends View {
         actions.push(this.button("detail-delete","trash",entry.kind==="task" ? "Taskを削除" : "論理削除",cx=>entry.kind==="task" ? this.overlay("delete","task",entry.entry) : this.buildForm("delete",entry.kind,entry.entry,cx),t,false,
           entry.kind==="task" && !canPurgeTask(this.snapshot,entry.entry)));
     }
-    return this.modal(record?.objective ?? record?.name ?? event?.title ?? KIND_NAMES[entry?.kind] ?? "詳細",record?.status,
+    const title=record?.objective ?? record?.name ?? event?.title ?? KIND_NAMES[entry?.kind] ?? "詳細";
+    return this.modal(event ? event.kindLabel+" · "+title : title,record?.status,
       this.scroll("detail-fields",fields,t,"この項目は削除されたか、現在のProjectにありません。"),actions,t);
   }
   input(name,value="",multi=false) {
