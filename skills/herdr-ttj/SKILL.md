@@ -5,7 +5,7 @@ description: Herdr TTJ Modの導入、Project選択、timeline・canvas・list�
 
 # Herdr TTJ Mod
 
-TTJCore 0.1.0とHerdr 0.1.15以降を使用する。Modリポジトリで、PowerShellはscripts/install.ps1、Linux・macOSはscripts/install.shを使う。標準接続ではCoreの初期化・起動をModが行う。手動のinit・serveを日常操作の前提にしない。
+TTJCore 0.1.1とHerdr 0.1.15以降を使用する。Modリポジトリで、PowerShellはscripts/install.ps1、Linux・macOSはscripts/install.shを使う。標準接続ではCoreの初期化・起動をModが行う。手動のinit・serveを日常操作の前提にしない。
 
 ユーザーの目的に合わせて操作を案内する。
 
@@ -21,4 +21,4 @@ TTJCore 0.1.0とHerdr 0.1.15以降を使用する。Modリポジトリで、Powe
 
 横配置は`herdr-app do layout.switch --name ttj-side`、下配置は`--name ttj-bottom`、専用画面は`--name ttj`を使う。別のOSウインドウは別HERDR_APP_HOMEへModを配置して起動し、同じTTJCore profileへ接続する。HERDR_APP_HOMEの変更はHerdrのSpace・terminalの隔離を意味しない。
 
-LLMがCoreのrecord・eventを扱うときは、[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/fa6da9588148c2c70590b17eacd93945165a420a/skills/ttjcore/references/protocol.md)を読む。TTJCore CLI／RPCへ直接接続し、UIから状態を取得しない。実行側がCoreに記録した変更がModへ反映される。
+LLMがCoreのrecord・eventを扱うときは、[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/4faa55db43da2751971863b807bdf516dc6e2bac/skills/ttjcore/references/protocol.md)を読む。TTJCore CLI／RPCへ直接接続し、UIから状態を取得しない。実行側がCoreに記録した変更がModへ反映される。

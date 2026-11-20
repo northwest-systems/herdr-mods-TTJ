@@ -7,7 +7,7 @@
 
 ## 概要
 
-TTJCore 0.1.0を使い、Projectごとのタイムライン・TaskからTicketへ分岐するキャンバス・Task／Ticketリストを切り替えるHerdr Modです。バージョンは0.1.0です。Windows・Linux・macOSのHerdr 0.1.15以降を対象にします。
+TTJCore 0.1.1を使い、Projectごとのタイムライン・TaskからTicketへ分岐するキャンバス・Task／Ticketリストを切り替えるHerdr Modです。バージョンは0.1.1です。Windows・Linux・macOSのHerdr 0.1.15以降を対象にします。
 
 Project・Task・Ticketの作成・参照・編集・論理削除、状態変更、ProjectのKnowledge作成・参照に対応します。IDはCoreが自動発行します。Ticketは1つのTaskに所属し、Jobの構成・順序はTicket作成後に固定されます。
 
@@ -15,13 +15,13 @@ Coreが確定した変更を待ち受け、カード・一覧・開いている�
 
 ## クイックスタート
 
-1. [TTJCoreのクイックスタート](https://github.com/northwest-systems/TTJCore#クイックスタート)に従ってCore 0.1.0をインストールし、Herdrから`ttjcore`を起動できるPATHを用意します。インストール時にはRust・Cコンパイラーを使いますが、Modの利用時には不要です。
+1. [TTJCoreのクイックスタート](https://github.com/northwest-systems/TTJCore#クイックスタート)に従ってCore 0.1.1をインストールし、Herdrから`ttjcore`を起動できるPATHを用意します。インストール時にはRust・Cコンパイラーを使いますが、Modの利用時には不要です。
 2. Herdrをインストールし、次のコマンドでModを配置します。インストールスクリプトはこのリポジトリのModと3つのレイアウトをHerdrの設定フォルダーへコピーします。パッケージのダウンロードは行いません。同名のファイルは更新されます。
 
 ```sh
 git clone https://github.com/northwest-systems/herdr-mods-TTJ.git
 cd herdr-mods-TTJ
-git checkout v0.1.0
+git checkout v0.1.1
 ```
 
 PowerShell 7:
@@ -142,7 +142,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 
 ## 開発
 
-Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/fa6da9588148c2c70590b17eacd93945165a420a/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。
+Coreのinterfaceは[TTJCore protocol](https://github.com/northwest-systems/TTJCore/blob/4faa55db43da2751971863b807bdf516dc6e2bac/skills/ttjcore/references/protocol.md)、LLM向けの入口は[skills/herdr-ttj/SKILL.md](skills/herdr-ttj/SKILL.md)です。
 
 テストはNode.js 24以降の標準runnerを使い、npm installは不要です。Herdrのcheckは生成した型定義を使ってModを確認します。
 
