@@ -1,7 +1,7 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
-import {PLACEMENTS,showPlacement} from "../mods/ttj/placement.js";
+import {PLACEMENTS,paneTarget,actOnPane,showPlacement} from "../mods/ttj/placement.js";
 
 const dock={id:"ttj-side",children:[{id:"ttj-panel",hidden:false}]};
 function host(overrides={}) {
@@ -56,4 +56,29 @@ test("keeps the dock open when window startup fails without exposing process dia
   await assert.rejects(showPlacement("window",current),error=>!error.message.includes("private diagnostic"));
   assert.deepEqual(current.calls,[]);
   await assert.rejects(showPlacement("unsupported",current),/表示先/);
+});
+
+test("targets the TTJ pane in the current tab even when another pane has focus",()=>{
+  const current=[{pane:"shell",tab:"work"},{pane:"board",tab:"work",mod:"ttj"},{pane:"other-board",tab:"other",mod:"ttj"}];
+  assert.equal(paneTarget({}, {pane:"shell",tab:"work"},current)?.pane,"board");
+  assert.equal(paneTarget({pane:"other-board"},null,current)?.pane,"other-board");
+  assert.equal(paneTarget({pane:"gone"}, {tab:"work"},current),null);
+  assert.equal(paneTarget({}, {tab:"empty"},current),null);
+  assert.equal(paneTarget({}, {tab:"work"},[...current,{pane:"second-board",tab:"work",mod:"ttj"}]),null);
+});
+
+test("runs pane menu actions on their captured target rather than the focused pane",()=>{
+  const calls=[],current=[{pane:"board"},{pane:"shell"}];
+  const host={panes:()=>current,run:(command,args)=>calls.push({command,args})};
+  for(const action of ["right","down","zoom","close"]) assert.equal(actOnPane(action,"board",host),true);
+  assert.deepEqual(calls,[
+    {command:"pane.split",args:{pane:"board",direction:"right"}},
+    {command:"pane.split",args:{pane:"board",direction:"down"}},
+    {command:"pane.zoom",args:{pane:"board"}},
+    {command:"pane.close",args:{pane:"board"}},
+  ]);
+  const count=calls.length;
+  assert.equal(actOnPane("close","gone",host),false);
+  assert.equal(actOnPane("unknown","board",host),false);
+  assert.equal(calls.length,count);
 });

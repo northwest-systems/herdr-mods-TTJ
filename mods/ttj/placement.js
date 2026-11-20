@@ -6,6 +6,27 @@ export const PLACEMENTS = [
   ["window","別OSウインドウ","window"],
 ];
 
+export const PANE_ACTIONS = [
+  ["right","右に分割","pane-right"],
+  ["down","下に分割","pane-down"],
+  ["zoom","拡大／元に戻す","reset"],
+  ["close","paneを閉じる","close"],
+];
+
+export function paneTarget(config, focus, current) {
+  if (config?.pane) return current.find(item=>item.pane===config.pane) ?? null;
+  const candidates=current.filter(item=>item.mod==="ttj" && item.tab===focus?.tab);
+  return candidates.length===1 ? candidates[0] : null;
+}
+
+export function actOnPane(action, pane, host) {
+  if (!host.panes().some(item=>item.pane===pane)) return false;
+  if (action==="right" || action==="down") host.run("pane.split",{pane,direction:action});
+  else if (action==="zoom" || action==="close") host.run("pane."+action,{pane});
+  else return false;
+  return true;
+}
+
 export function findPanel(root) {
   if (root?.id==="ttj-panel") return root;
   for (const child of root?.children ?? []) {

@@ -52,7 +52,16 @@
               "id": "workspace-panes",
               "type": "block",
               "content": {
-                "tab": "active"
+                "tab": "active",
+                "pane": {
+                  "lone": true,
+                  "header": {
+                    "content": { "mod": "ttj", "props": { "screen": "pane-header" } },
+                    "height": 30,
+                    "position": "top",
+                    "reveal": "always"
+                  }
+                }
               }
             }
           ]

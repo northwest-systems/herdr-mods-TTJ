@@ -6,7 +6,7 @@ import { platform } from "process";
 import { exists } from "fs/promises";
 import { createClient } from "./client.js";
 import { STATUS, KIND_NAMES, tickets, timeline, entityMap, dependencyTickets, formatTimestamp, TIME_ZONES, ticketCanvas, visibleJobs, visibleWork, canPurgeTask, jobIcon, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
-import { PLACEMENTS, findPanel, showPlacement } from "./placement.js";
+import { PLACEMENTS, PANE_ACTIONS, paneTarget, actOnPane, findPanel, showPlacement } from "./placement.js";
 
 const VIEWS=[["timeline","タイムライン"],["tree","キャンバス"],["list","リスト"]];
 const LABELS={name:"名前",objective:"目標",summary:"概要",criteria:"完了条件（1行に1つ）",deadline:"期限（タイムゾーン付き日時）",
@@ -26,8 +26,9 @@ export default class TTJ extends View {
     this.screen=this.config.screen ?? null;this.form=null;this.inputs=[];
     this.error="";this.busy=false;this.closed=false;this.token=0;this.watchToken=0;this.drag=null;
     this.preferences=settings();this.settingsStamp=JSON.stringify(this.preferences);
+    if (this.screen==="pane-menu") {this.menuAt=0;this.menuHandle=cx.focus_handle();this.menuHandle.focus();}
     if (["settings","create","edit","delete","status"].includes(this.screen)) this.buildForm(this.screen,this.config.kind,this.config.entry,cx);
-    if (herdr.checking?.()) return;
+    if (herdr.checking?.() || ["pane-header","pane-menu"].includes(this.screen)) return;
     cx.spawn(async cx=>{
       while (!this.closed) {
         await nextCommand();
@@ -164,6 +165,41 @@ export default class TTJ extends View {
   placement() {
     const saved=shared("ttj.placement");
     return PLACEMENTS.some(([id])=>id===saved) ? saved : layout()?.id==="ttj-bottom" ? "bottom" : "right";
+  }
+  paneMenu(pane) {
+    if (!pane) {
+      notify({title:"TTJ",body:"操作するpaneのヘッダーを右クリックしてください。",level:"info"});
+      return;
+    }
+    openOverlay({mod:"ttj",kind:"popup",width:220,height:150,props:{screen:"pane-menu",pane:pane.pane}});
+  }
+  paneAction(action,pane=this.config.pane) {
+    actOnPane(action,pane,{panes,run});
+    if (this.config.overlay) closeOverlay(this.config.overlay);
+  }
+  paneHeader(t) {
+    const pane=paneTarget(modProps(),null,panes());
+    if (!pane) return div();
+    return h_flex().size_full().px(8).gap(4).items_center().bg(t.surface).text_color(t.foreground)
+      .on_click(()=>run("pane.focus",{pane:pane.pane}))
+      .on_mouse_down("right",(_event,cx)=>{cx.stop_propagation();this.paneMenu(pane);})
+      .child(div().flex_1().truncate().text_size(12).child(pane.mod==="ttj" ? "TTJ" : pane.title || pane.program?.name || "Terminal"))
+      .children(PANE_ACTIONS.map(([action,label,icon])=>this.button("pane-"+action,icon,label,()=>this.paneAction(action,pane.pane),t)));
+  }
+  paneMenuView(t) {
+    return v_flex().w_full().p(5).gap(2).bg(t.popover).text_color(t.foreground).track_focus(this.menuHandle)
+      .on_key_down((event,cx)=>{
+        if (event.key==="up") this.menuAt=(this.menuAt+PANE_ACTIONS.length-1)%PANE_ACTIONS.length;
+        else if (event.key==="down") this.menuAt=(this.menuAt+1)%PANE_ACTIONS.length;
+        else if (event.key==="enter") this.paneAction(PANE_ACTIONS[this.menuAt][0]);
+        else if (event.key==="escape") closeOverlay(this.config.overlay);
+        else return;
+        cx.notify();
+      })
+      .children(PANE_ACTIONS.map(([action,label,icon],index)=>Button.new("pane-menu-"+action).w_full().h(32).px(8).rounded(6)
+        .bg(index===this.menuAt ? t.selected : t.popover).hover(s=>s.bg(t.hover))
+        .on_click(()=>this.paneAction(action))
+        .child(h_flex().gap(8).items_center().child(this.glyph(icon,t,14)).child(label))));
   }
   placementContext() {
     const focus=focused(),current=panes();
@@ -597,6 +633,18 @@ export default class TTJ extends View {
       this.button("knowledge-add","plus","Knowledgeを作成",cx=>this.buildForm("create","knowledge",null,cx),t)],t);
   }
   render(cx) {
+    const t=this.colors(cx);
+    if (this.screen==="pane-header") return this.paneHeader(t);
+    if (this.screen==="pane-menu") return this.paneMenuView(t);
+    const content=this.content(cx);
+    if (!this.config.panel && !this.config.overlay && !this.config.launcher && !this.screen) {
+      return content.on_mouse_down("right",(_event,cx)=>{
+        cx.stop_propagation();this.paneMenu(paneTarget(this.config,focused(),panes()));
+      });
+    }
+    return content;
+  }
+  content(cx) {
     const t=this.colors(cx);
     if (this.config.launcher) return this.panelToggle(cx);
     if (this.screen==="placement") return this.placementView();
