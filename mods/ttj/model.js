@@ -9,7 +9,7 @@ const EVENTS = {
 };
 export const JOB_COLORS = {
   todo:"#64748b", doing:"#2563eb", waiting:"#b45309", paused:"#7c3aed",
-  blocked:"#dc2626", completed:"#16803c", canceled:"#475569",
+  blocked:"#dc2626", completed:"#16803c", canceled:"#9d174d",
 };
 export const DEFAULT_ICONS = {
   job:"mods/ttj/assets/octicons/checklist-16.svg",
@@ -147,7 +147,7 @@ export function edgeBridges(edges) {
     else vertical.push({edge,x:x1,top:Math.min(y1,y2),bottom:Math.max(y1,y2)});
   }
   for (const h of horizontal) for (const v of vertical) {
-    if (h.edge===v.edge || h.edge.to===v.edge.to) continue;
+    if (h.edge===v.edge || h.edge.from && h.edge.from===v.edge.from || h.edge.to===v.edge.to) continue;
     if (v.x>=h.left+6 && v.x<=h.right-6 && h.y>=v.top && h.y<=v.bottom)
       bridges.set(v.x+":"+h.y,{x:v.x,y:h.y});
   }
@@ -220,20 +220,29 @@ export function ticketCanvas(snapshot, visibility={}) {
   for (const node of all) {node.column=column(node);node.y=24+spacing*row(node);}
   for (const node of all) {
     const outputs=connections.filter(edge=>edge.from===node).sort((a,b)=>a.to.y-b.to.y || a.to.x-b.to.x || compare(a.to,b.to));
-    outputs.forEach((edge,index)=>{
-      edge.startY=node.y+(index===0 && edge.to.y===node.y && edge.to.column===node.column+1 ? 49 : 60+20*index/Math.max(1,outputs.length-1));
+    const straight=outputs.every(edge=>edge.to.y===node.y && edge.to.column===node.column+1);
+    outputs.forEach(edge=>{
+      edge.startY=node.y+(straight ? 49 : 70);
       edge.endY=edge.to.y+49;
       edge.gutterY=edge.to.column>edge.column+1 ? edge.to.y+110+12*gutterIndex.get(Math.round((edge.to.y-24)/spacing)).indexOf(edge.to.entry.record.id) : edge.endY;
     });
   }
-  const lanes=new Map();
-  // Longer routes stay nearer the source; merges may share a lane.
-  for (const edge of [...connections].sort((a,b)=>Math.abs(b.gutterY-b.startY)-Math.abs(a.gutterY-a.startY) || b.endY-a.endY || b.startY-a.startY)) {
-    if (!lanes.has(edge.column)) lanes.set(edge.column,[]);
-    const slots=lanes.get(edge.column),top=Math.min(edge.startY,edge.gutterY),bottom=Math.max(edge.startY,edge.gutterY);
-    let lane=slots.findIndex(items=>items.every(other=>other.to===edge.to || other.from!==edge.from && (bottom+8<other.top || top>other.bottom+8)));
+  const lanes=new Map(),branches=new Map();
+  for (const edge of connections) {
+    if (!branches.has(edge.from)) branches.set(edge.from,[]);
+    branches.get(edge.from).push(edge);
+  }
+  const span=edges=>Math.max(...edges.map(edge=>Math.max(edge.startY,edge.gutterY)))-Math.min(...edges.map(edge=>Math.min(edge.startY,edge.gutterY)));
+  // One lane per source keeps large fan-outs narrow. Merges may share a lane.
+  for (const branch of [...branches.values()].sort((a,b)=>span(b)-span(a) || compare(a[0].from,b[0].from))) {
+    const column=branch[0].column;
+    if (!lanes.has(column)) lanes.set(column,[]);
+    const slots=lanes.get(column);
+    const routes=branch.map(edge=>({top:Math.min(edge.startY,edge.gutterY),bottom:Math.max(edge.startY,edge.gutterY),to:edge.to}));
+    let lane=slots.findIndex(items=>routes.every(route=>items.every(other=>other.to===route.to || route.bottom+8<other.top || route.top>other.bottom+8)));
     if (lane<0) {lane=slots.length;slots.push([]);}
-    slots[lane].push({top,bottom,from:edge.from,to:edge.to});edge.lane=lane;
+    slots[lane].push(...routes);
+    for (const edge of branch) edge.lane=lane;
   }
   const columns=[24];
   for (let index=0;index<Math.max(0,...all.map(node=>node.column));index++) columns.push(columns[index]+242+Math.max(52,24+12*(lanes.get(index)?.length ?? 0)));

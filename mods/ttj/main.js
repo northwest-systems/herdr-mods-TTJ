@@ -1,11 +1,12 @@
 import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex, Button, InputState, Input, TextareaState, Textarea } from "gpui-base";
 import * as herdr from "herdr";
-const { exec, theme, props:modProps, appHome, openOverlay, closeOverlay, shared, setShared, nextCommand, layout, run } = herdr;
+const { exec, theme, props:modProps, appHome, openOverlay, closeOverlay, shared, setShared, nextCommand, layout, run, focused, panes, notify } = herdr;
 import { platform } from "process";
 import { exists } from "fs/promises";
 import { createClient } from "./client.js";
 import { STATUS, tickets, timeline, entityMap, dependencyTickets, formatTimestamp, TIME_ZONES, ticketCanvas, visibleJobs, visibleWork, jobIcon, JOB_COLORS, DEFAULT_ICONS } from "./model.js";
+import { PLACEMENTS, findPanel, showPlacement } from "./placement.js";
 
 const KIND_NAMES={project:"Project",task:"Task",ticket:"Ticket",job:"Job",run:"Run",knowledge:"Knowledge"};
 const VIEWS=[["timeline","タイムライン"],["tree","キャンバス"],["list","リスト"]];
@@ -35,12 +36,12 @@ export default class TTJ extends View {
         const next=settings();
         if (JSON.stringify(next)!==this.settingsStamp) {
           this.preferences=next;this.settingsStamp=JSON.stringify(next);
-          if (!this.config.launcher) await this.connect(cx);
+          if (!this.config.launcher && this.screen!=="placement") await this.connect(cx);
         }
         cx.notify();
       }
     });
-    if (!this.config.launcher) cx.spawn(async cx=>this.connect(cx));
+    if (!this.config.launcher && this.screen!=="placement") cx.spawn(async cx=>this.connect(cx));
   }
   async connect(cx) {
     const p=this.preferences;
@@ -151,7 +152,7 @@ export default class TTJ extends View {
       .text_size(10).text_color(this.statusColor(status,t)).child(STATUS[status] ?? status ?? "");
   }
   statusColor(status,t) {
-    const dark={todo:"#94a3b8",doing:"#60a5fa",waiting:"#fbbf24",paused:"#c4b5fd",blocked:"#f87171",completed:"#86efac",canceled:"#9ca3af"};
+    const dark={todo:"#94a3b8",doing:"#60a5fa",waiting:"#fbbf24",paused:"#c4b5fd",blocked:"#f87171",completed:"#86efac",canceled:"#f9a8d4"};
     return (t.dark ? dark[status] : JOB_COLORS[status]) ?? t.muted;
   }
   legend(t) {
@@ -161,11 +162,65 @@ export default class TTJ extends View {
         .child(div().size(7).rounded_full().bg(this.statusColor(status,t)))
         .child(div().text_size(10).text_color(t.muted).child(STATUS[status]))));
   }
-  panelToggle(t) {
-    const find=node=>node?.id===this.config.panel ? node : (node?.children ?? []).map(find).find(Boolean);
-    const panel=find(layout()),open=panel && !panel.hidden;
-    return h_flex().size_full().items_center().justify_end().px(4)
-      .child(this.tab("ttj-panel-toggle","TTJ",()=>run("layout.toggle",{id:this.config.panel}),t,Boolean(open),62));
+  placement() {
+    const saved=shared("ttj.placement");
+    return PLACEMENTS.some(([id])=>id===saved) ? saved : layout()?.id==="ttj-bottom" ? "bottom" : "right";
+  }
+  placementContext() {
+    const focus=focused(),current=panes();
+    return {pane:focus?.pane,existingPane:current.find(item=>item.mod==="ttj" && item.tab===focus?.tab)?.pane};
+  }
+  choosePlacement(mode,cx) {
+    if (this.busy) return;
+    const context=this.screen==="placement" ? this.config : this.placementContext();
+    this.error="";this.busy=true;cx.notify();
+    cx.spawn(async cx=>{
+      try {
+        await showPlacement(mode,{...context,root:layout(),run,exec,appHome:appHome(),platform,preferences:settings()});
+        setShared("ttj.placement",mode);
+        if (this.screen==="placement") closeOverlay(this.config.overlay);
+      } catch {
+        this.error="表示先を開けません。作業paneの選択とHerdrの起動設定を確認してください。";
+        if (this.config.launcher) notify({title:"TTJ",body:this.error,level:"error"});
+      }
+      finally {this.busy=false;cx.notify();}
+    });
+  }
+  placementMenu() {
+    openOverlay({mod:"ttj",kind:"popup",width:240,props:{screen:"placement",...this.placementContext()}});
+  }
+  panelToggle(cx) {
+    const t=theme(),panel=findPanel(layout()),mode=this.placement();
+    const dock=mode==="right" ? "ttj-side" : "ttj-bottom";
+    const open=["right","bottom"].includes(mode) && layout()?.id===dock && panel && !panel.hidden;
+    return h_flex().size_full().px(2).gap(1).items_center().justify_end().bg(t.chrome)
+      .child(h_flex().id("ttj-panel-toggle").h(26).px(8).gap(5).flex_none().items_center().rounded(6)
+        .text_size(12).bg(open ? t.selected : t.chrome).text_color(open ? t.foreground : t.muted)
+        .tooltip(open ? "TTJを閉じる" : "TTJを開く").accessibility_label(open ? "TTJを閉じる" : "TTJを開く")
+        .cursor_pointer().hover(s=>s.bg(t.hover)).on_mouse_down("left",(_event,cx)=>cx.stop_propagation())
+        .on_click((_event,cx)=>open ? run("layout.hide",{id:"ttj-panel"}) : this.choosePlacement(mode,cx))
+        .child(image("mods/ttj/assets/app-icon-"+(cx.theme().is_dark ? "white" : "black")+".png").size(14).flex_none())
+        .child("TTJ"))
+      .child(div().id("ttj-placement").size(26).flex_none().flex().items_center().justify_center().rounded(6)
+        .bg(t.chrome).text_color(t.muted).cursor_pointer().hover(s=>s.bg(t.hover))
+        .tooltip("TTJを開く場所").accessibility_label("TTJを開く場所")
+        .on_mouse_down("left",(_event,cx)=>cx.stop_propagation()).on_click(()=>this.placementMenu())
+        .child(svg("mods/ttj/icons/chevron-down.svg").size(14)));
+  }
+  placementView() {
+    const t=theme(),mode=this.placement();
+    return v_flex().w_full().p(6).gap(3).bg(t.popover).text_color(t.foreground)
+      .child(div().px(8).py(6).text_size(12).font_semibold().child("TTJを開く場所"))
+      .children(PLACEMENTS.map(([id,label,icon])=>{
+        const disabled=this.busy || id.startsWith("pane-") && !this.config.pane && !this.config.existingPane;
+        return Button.new("placement-"+id).w_full().h(32).px(8).rounded(6).disabled(disabled)
+          .bg(id===mode ? t.selected : t.popover).text_color(disabled ? t.dim : t.foreground)
+          .tooltip(disabled && id.startsWith("pane-") ? "分割する作業paneを選択してください" : label)
+          .when(!disabled,el=>el.cursor_pointer().hover(s=>s.bg(t.hover)))
+          .on_click((_event,cx)=>this.choosePlacement(id,cx))
+          .child(h_flex().gap(8).items_center().text_size(12).child(this.glyph(icon,t,14)).child(label));
+      }))
+      .when(Boolean(this.error),el=>el.child(div().p(8).text_size(11).text_color(t.ansi1).child(this.error)));
   }
   copy(id,t) {return this.button("copy-"+id,"id.copy",id+" · クリックでコピー",cx=>cx.write_to_clipboard(id),t);}
   row(id,title,status,action,t,key=null) {
@@ -516,7 +571,8 @@ export default class TTJ extends View {
   }
   render(cx) {
     const t=this.colors(cx);
-    if (this.config.launcher) return this.panelToggle(t);
+    if (this.config.launcher) return this.panelToggle(cx);
+    if (this.screen==="placement") return this.placementView();
     if (["settings","create","edit","delete","status"].includes(this.screen)) return this.formView(t);
     if (this.screen==="knowledge") return this.knowledge(t);
     if (this.detailRef) return this.details(t);

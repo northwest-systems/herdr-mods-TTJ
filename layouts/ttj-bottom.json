@@ -45,7 +45,7 @@
               },
               "children": [
                 { "id": "workspace-tab-bar", "type": "block", "content": { "mod": "tabs" } },
-                { "id": "ttj-toggle", "type": "block", "size": { "px": 70 }, "content": { "mod": "ttj", "props": { "launcher": true, "panel": "ttj-panel" } } }
+                { "id": "ttj-toggle", "type": "block", "size": { "px": 104 }, "content": { "mod": "ttj", "props": { "launcher": true, "panel": "ttj-panel" } } }
               ]
             },
             {

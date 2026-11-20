@@ -122,7 +122,7 @@ const segments=edge=>edge.points.slice(1).map((point,index)=>({from:edge.points[
 function nonMergingOverlaps(scene) {
  const overlaps=[];
  for (let i=0;i<scene.edges.length;i++) for(let j=i+1;j<scene.edges.length;j++) {
-   const a=scene.edges[i],b=scene.edges[j];if(a.to===b.to) continue;
+   const a=scene.edges[i],b=scene.edges[j];if(a.from===b.from || a.to===b.to) continue;
    for(const left of segments(a)) for(const right of segments(b)) {
      const horizontal=left.from[1]===left.to[1] && right.from[1]===right.to[1] && left.from[1]===right.from[1];
      const vertical=left.from[0]===left.to[0] && right.from[0]===right.to[0] && left.from[0]===right.from[0];
@@ -173,12 +173,28 @@ test("adds a semicircle at non-merging crossings while leaving merges connected"
  const horizontal={to:destination,points:[[0,20],[60,20]]},vertical={to:other,points:[[30,0],[30,40]]};
  assert.deepEqual(edgeBridges([horizontal,vertical]),[{x:30,y:20}]);
  assert.deepEqual(edgeBridges([horizontal,{...vertical,to:destination}]),[]);
+ const source={};
+ assert.deepEqual(edgeBridges([{...horizontal,from:source},{...vertical,from:source}]),[]);
  assert.deepEqual(edgeBridges([horizontal,vertical,{...vertical,to:{}}]),[{x:30,y:20}]);
  assert.deepEqual(edgeBridges([{to:{},points:[[0,20],[60,20],[60,0],[30,0],[30,40]]}]),[]);
  const scene=ticketCanvas(graph([["task",[["a"],["b"],["c",["a","b"]],["d",["a","b"]]]]]));
  assert.ok(scene.bridges.length>0);
  assert.deepEqual(nonMergingOverlaps(scene),[]);
  assert.equal(scene.nodes.length,5);
+});
+
+test("shares one branching trunk for many Tickets without widening the Task column gap",()=>{
+ const definitions=Array.from({length:80},(_,index)=>["ticket-"+String(index).padStart(2,"0")]);
+ const snapshot=graph([["task",definitions]]),scene=ticketCanvas(snapshot);
+ assert.equal(scene.nodes.length,81);assert.equal(scene.edges.length,80);
+ const trunk=scene.edges[0].points.slice(0,2);
+ for(const edge of scene.edges) {
+   assert.deepEqual(edge.points.slice(0,2),trunk);
+   assert.equal(edge.lane,0);assert.equal(edge.to.x,318);
+ }
+ assert.deepEqual(scene.bridges,[]);
+ assert.deepEqual(nonMergingOverlaps(scene),[]);
+ assert.equal(scene.width,584);
 });
 test("wires the side and bottom launcher to an initially hidden TTJ panel",async()=>{
  for (const name of ["ttj-side","ttj-bottom"]) {

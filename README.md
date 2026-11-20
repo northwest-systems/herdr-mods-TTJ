@@ -45,11 +45,11 @@ herdr-app do layout.switch --name ttj
 
 キャンバス・リストは、ヘッダーのフィルターアイコンで進行対象への経路と全表示を切り替えられます。前提の中間点と未終了TicketのTaskを残し、終了・待機の末尾と末端がすべて保留のbranchを省略します。表示条件はProjectごとに保持します。
 
-横・下レイアウトはタブバーのTTJボタンで必要時だけ開閉します。日時はJSTを既定とし、設定でUTC・端末の設定へ変更できます。状態色はフッターで確認できます。
+横・下レイアウトはタブバーの単色アイコン＋TTJボタンで必要時だけ開閉します。隣の矢印から、右側・下側・paneの右／下分割・別OSウインドウを選べます。日時はJSTを既定とし、設定でUTC・端末の設定へ変更できます。状態色はフッターで確認でき、未着手はグレー、中止はピンク系です。
 
 ## 使い方ガイド
 
-[画像付き使い方ガイド](docs/usage-guide.md)で、横配置・下配置・別タブ・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
+[画像付き使い方ガイド](docs/usage-guide.md)で、表示先ボタン・pane分割・別ウインドウで開く方法と、Project・Task・Ticket・Jobの操作を説明しています。
 
 [App icon](docs/app-icon.md)は、ライト用・ダーク用・単色の黒・白を用意した512×512 pxの透過PNGです。
 
@@ -101,6 +101,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── back.svg                # 戻るのアイコン
 │       │   ├── book.svg                # Project Knowledgeのアイコン
 │       │   ├── bridge.svg              # 交差する依存線の半円
+│       │   ├── chevron-down.svg        # 表示先メニューの矢印
 │       │   ├── close.svg               # 閉じるのアイコン
 │       │   ├── edit.svg                # 編集のアイコン
 │       │   ├── execute.svg             # コマンド実行のアイコン
@@ -108,6 +109,10 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── folder.svg              # Projectの詳細のアイコン
 │       │   ├── list.svg                # リスト表示のアイコン
 │       │   ├── minus.svg               # 縮小のアイコン
+│       │   ├── pane-down.svg           # paneの下分割
+│       │   ├── pane-right.svg          # paneの右分割
+│       │   ├── panel-bottom.svg        # 下側への表示
+│       │   ├── panel-right.svg         # 右側への表示
 │       │   ├── plus.svg                # 追加・拡大のアイコン
 │       │   ├── refresh.svg             # 再接続のアイコン
 │       │   ├── reset.svg               # 表示をリセットのアイコン
@@ -120,11 +125,15 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │       │   ├── ticket.svg              # Ticket作成のアイコン
 │       │   ├── timeline.svg            # タイムライン表示のアイコン
 │       │   ├── trash.svg               # 論理削除のアイコン
-│       │   └── tree.svg                # キャンバス表示のアイコン
+│       │   ├── tree.svg                # キャンバス表示のアイコン
+│       │   └── window.svg              # 別OSウインドウの表示
 │       ├── client.js                   # Coreへの接続・呼び出し
 │       ├── main.js                     # 画面・詳細・CRUD・テーマ連動
 │       ├── mod.json                    # Herdr Modの設定
-│       └── model.js                    # タイムライン・キャンバス・Job表示の計算
+│       ├── model.js                    # タイムライン・キャンバス・Job表示の計算
+│       ├── open-window.ps1             # Windowsの別OSウインドウ起動
+│       ├── open-window.sh              # Linux・macOSの別OSウインドウ起動
+│       └── placement.js                # 表示先の切り替え
 ├── scripts/                            # インストーラー
 │   ├── install.ps1                     # Windows用インストーラー
 │   └── install.sh                      # Linux・macOS用インストーラー
@@ -132,6 +141,7 @@ herdr-mods-TTJ/                         # Herdr用TTJ Mod
 │   └── herdr-ttj/                      # Herdr Modの利用スキル
 │       └── SKILL.md                    # LLM向けの導入・操作手順
 ├── tests/                              # 自動テスト
+│   ├── placement.test.js               # 表示先・起動引数のテスト
 │   └── viewer.test.js                  # client・表示計算のテスト
 ├── .gitignore                          # Gitの除外設定
 ├── LICENSE                             # Apache-2.0ライセンス
